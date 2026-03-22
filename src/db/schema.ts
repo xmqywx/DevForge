@@ -69,3 +69,27 @@ export const settings = sqliteTable("settings", {
   key: text("key").primaryKey(),
   value: text("value", { mode: "json" }),
 });
+
+export const feedback = sqliteTable("feedback", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  projectId: integer("project_id").notNull().references(() => projects.id, { onDelete: "cascade" }),
+  authorName: text("author_name").default("匿名"),
+  authorIp: text("author_ip"),
+  title: text("title").notNull(),
+  description: text("description").default(""),
+  type: text("type", { enum: ["bug", "feature", "improvement", "question"] }).default("feature"),
+  status: text("status", { enum: ["open", "under-review", "in-progress", "resolved", "wont-fix", "spam"] }).default("open"),
+  upvotes: integer("upvotes").default(0),
+  images: text("images", { mode: "json" }).$type<string[]>().default([]),
+  isConverted: integer("is_converted", { mode: "boolean" }).default(false),
+  issueId: integer("issue_id"),
+  createdAt: text("created_at").default(sql`(datetime('now'))`),
+  updatedAt: text("updated_at").default(sql`(datetime('now'))`),
+});
+
+export const feedbackVotes = sqliteTable("feedback_votes", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  feedbackId: integer("feedback_id").notNull().references(() => feedback.id, { onDelete: "cascade" }),
+  voterIp: text("voter_ip").notNull(),
+  createdAt: text("created_at").default(sql`(datetime('now'))`),
+});
