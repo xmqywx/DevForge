@@ -1,6 +1,5 @@
 #!/bin/bash
 # Register DevForge MCP server in Claude's config
-# Claude Code reads MCP servers from ~/.claude.json (NOT ~/.claude/settings.json)
 CONFIG="$HOME/.claude.json"
 DEVFORGE_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 
@@ -14,7 +13,8 @@ const config = JSON.parse(fs.readFileSync('$CONFIG', 'utf8'));
 if (!config.mcpServers) config.mcpServers = {};
 config.mcpServers.devforge = {
   command: '${DEVFORGE_DIR}/node_modules/.bin/tsx',
-  args: ['${DEVFORGE_DIR}/mcp-server/index.ts']
+  args: ['${DEVFORGE_DIR}/mcp-server/index.ts'],
+  cwd: '${DEVFORGE_DIR}'
 };
 fs.writeFileSync('$CONFIG', JSON.stringify(config, null, 2));
 console.log('Registered DevForge MCP server in ~/.claude.json');
