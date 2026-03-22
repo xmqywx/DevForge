@@ -93,3 +93,21 @@ export const feedbackVotes = sqliteTable("feedback_votes", {
   voterIp: text("voter_ip").notNull(),
   createdAt: text("created_at").default(sql`(datetime('now'))`),
 });
+
+export const issueVotes = sqliteTable("issue_votes", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  issueId: integer("issue_id").notNull().references(() => issues.id, { onDelete: "cascade" }),
+  voterIp: text("voter_ip").notNull(),
+  createdAt: text("created_at").default(sql`(datetime('now'))`),
+});
+
+export const issueComments = sqliteTable("issue_comments", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  issueId: integer("issue_id").notNull().references(() => issues.id, { onDelete: "cascade" }),
+  authorName: text("author_name").default("匿名"),
+  authorIp: text("author_ip"),
+  isOwner: integer("is_owner", { mode: "boolean" }).default(false),
+  content: text("content").notNull(),
+  images: text("images", { mode: "json" }).$type<string[]>().default([]),
+  createdAt: text("created_at").default(sql`(datetime('now'))`),
+});
