@@ -1,0 +1,20 @@
+{
+  "name": "devforge",
+  "owner": {
+    "name": "Ying",
+    "email": "xmqywx@gmail.com"
+  },
+  "metadata": {
+    "description": "Personal Project Command Center — manage all your side projects from Claude Code",
+    "version": "1.0.0"
+  },
+  "plugins": [
+    {
+      "name": "devforge",
+      "source": "./",
+      "description": "Manage projects, issues, notes, and progress across all your repos. MCP-powered context loading, session summaries, and git scanning.",
+      "category": "project-management",
+      "tags": ["projects", "issues", "notes", "dashboard", "mcp", "cli", "git"]
+    }
+  ]
+}

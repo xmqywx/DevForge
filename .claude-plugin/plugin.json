@@ -1,0 +1,24 @@
+{
+  "name": "devforge",
+  "description": "Personal Project Command Center — manage all your side projects from Claude Code",
+  "version": "1.0.0",
+  "author": {
+    "name": "Ying",
+    "url": "https://github.com/xmqywx"
+  },
+  "commands": [
+    "./commands/init.md",
+    "./commands/status.md",
+    "./commands/issues.md",
+    "./commands/add-issue.md",
+    "./commands/note.md",
+    "./commands/summary.md",
+    "./commands/progress.md",
+    "./commands/configure.md",
+    "./commands/open.md"
+  ],
+  "homepage": "https://github.com/xmqywx/DevForge",
+  "repository": "https://github.com/xmqywx/DevForge",
+  "license": "MIT",
+  "keywords": ["projects", "issues", "notes", "dashboard", "mcp", "git", "devforge"]
+}
