@@ -1,5 +1,5 @@
 ---
-name: issues
+name: df-issues
 description: List open issues for current project, sorted by priority
 ---
 

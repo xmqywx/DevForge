@@ -1,5 +1,5 @@
 ---
-name: note
+name: df-note
 description: Add a markdown note to current project
 ---
 

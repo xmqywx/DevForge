@@ -1,5 +1,5 @@
 ---
-name: summary
+name: df-summary
 description: Generate session summary — what was done, issues resolved, new discoveries
 ---
 

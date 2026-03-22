@@ -1,5 +1,5 @@
 ---
-name: progress
+name: df-progress
 description: Update project progress percentage, phase, or stage
 ---
 

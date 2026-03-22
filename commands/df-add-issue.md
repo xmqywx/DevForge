@@ -1,5 +1,5 @@
 ---
-name: add-issue
+name: df-add-issue
 description: Add an issue to current project
 ---
 

@@ -1,5 +1,5 @@
 ---
-name: status
+name: df-status
 description: Show project status — all projects overview or single project detail
 ---
 

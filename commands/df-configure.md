@@ -1,5 +1,5 @@
 ---
-name: configure
+name: df-configure
 description: Configure automation settings for current project
 ---
 
