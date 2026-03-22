@@ -1,6 +1,6 @@
 import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
 import { StdioServerTransport } from "@modelcontextprotocol/sdk/server/stdio.js";
-import { TOOLS } from "./tools";
+import { TOOLS } from "./tools.js";
 
 const server = new McpServer({ name: "devforge", version: "1.0.0" });
 

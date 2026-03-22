@@ -1,9 +1,9 @@
 import { z } from "zod";
-import { db } from "../src/db/client";
-import { projects, issues, notes, gitSnapshots, releases, milestones } from "../src/db/schema";
+import { db } from "../src/db/client.js";
+import { projects, issues, notes, gitSnapshots, releases, milestones } from "../src/db/schema.js";
 import { eq, desc, sql, inArray, and } from "drizzle-orm";
-import { getNextActionableIssues, getBlockedIssues, getProjectWithGit, getOverviewStats } from "../src/lib/queries";
-import { seedFromScan } from "../src/db/seed";
+import { getNextActionableIssues, getBlockedIssues, getProjectWithGit, getOverviewStats } from "../src/lib/queries.js";
+import { seedFromScan } from "../src/db/seed.js";
 
 type ToolDef = {
   name: string;
