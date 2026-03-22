@@ -1,65 +1,96 @@
-import Image from "next/image";
+import { db } from "@/db/client";
+import { projects, issues, gitSnapshots } from "@/db/schema";
+import { getOverviewStats } from "@/lib/queries";
+import { StatsCard } from "@/components/stats-card";
+import { ProjectCard } from "@/components/project-card";
+import { eq, desc, sql, and, inArray } from "drizzle-orm";
 
-export default function Home() {
+export const dynamic = "force-dynamic";
+
+export default function OverviewPage() {
+  const stats = getOverviewStats();
+
+  // Recent projects: join with latest git snapshot, order by scannedAt desc, dedup by project id
+  const recentRows = db
+    .select({
+      id: projects.id,
+      slug: projects.slug,
+      name: projects.name,
+      description: projects.description,
+      icon: projects.icon,
+      stage: projects.stage,
+      progressPct: projects.progressPct,
+      tags: projects.tags,
+      branch: gitSnapshots.branch,
+      lastCommitDate: gitSnapshots.lastCommitDate,
+      scannedAt: gitSnapshots.scannedAt,
+    })
+    .from(gitSnapshots)
+    .innerJoin(projects, eq(gitSnapshots.projectId, projects.id))
+    .orderBy(desc(gitSnapshots.scannedAt))
+    .all();
+
+  // Deduplicate by project id, keeping the most recent snapshot
+  const seen = new Set<number>();
+  const recentProjects = recentRows.filter((row) => {
+    if (seen.has(row.id)) return false;
+    seen.add(row.id);
+    return true;
+  }).slice(0, 6);
+
+  // Get open issue counts for these projects
+  const projectIds = recentProjects.map((p) => p.id);
+  const issueCounts =
+    projectIds.length > 0
+      ? db
+          .select({
+            projectId: issues.projectId,
+            count: sql<number>`count(*)`,
+          })
+          .from(issues)
+          .where(
+            and(
+              inArray(issues.projectId, projectIds),
+              inArray(issues.status, ["open", "in-progress", "in-review"])
+            )
+          )
+          .groupBy(issues.projectId)
+          .all()
+      : [];
+
+  const issueCountMap = new Map(issueCounts.map((r) => [r.projectId, r.count]));
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
+    <div className="space-y-8">
+      <h1 className="text-2xl font-bold">Overview</h1>
+
+      <div className="grid grid-cols-4 gap-4">
+        <StatsCard label="Total Projects" value={stats.totalProjects} />
+        <StatsCard label="Active" value={stats.activeProjects} color="text-green-400" />
+        <StatsCard label="Open Issues" value={stats.openIssues} color="text-amber-400" />
+        <StatsCard label="Feedback" value={0} />
+      </div>
+
+      <div>
+        <h2 className="text-lg font-semibold mb-4">Recent Projects</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {recentProjects.map((p) => (
+            <ProjectCard
+              key={p.id}
+              slug={p.slug}
+              name={p.name}
+              description={p.description ?? ""}
+              icon={p.icon ?? "📦"}
+              stage={p.stage ?? "idea"}
+              progressPct={p.progressPct ?? 0}
+              tags={(p.tags as string[]) ?? []}
+              lastCommitDate={p.lastCommitDate ?? undefined}
+              branch={p.branch ?? undefined}
+              openIssueCount={issueCountMap.get(p.id) ?? 0}
             />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+          ))}
         </div>
-      </main>
+      </div>
     </div>
   );
 }
