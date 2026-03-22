@@ -1,0 +1,17 @@
+{
+  "name": "devforge",
+  "version": "1.0.0",
+  "description": "Personal Project Command Center — manage all your side projects from Claude Code",
+  "author": "xmqywx",
+  "commands": [
+    { "name": "init", "description": "Initialize DevForge: create DB, register MCP, scan git repos" },
+    { "name": "status", "description": "Show project status (all or current)" },
+    { "name": "issues", "description": "List open issues for current project" },
+    { "name": "add-issue", "description": "Add an issue to current project" },
+    { "name": "note", "description": "Add a note to current project" },
+    { "name": "summary", "description": "Generate session summary and update project" },
+    { "name": "progress", "description": "Update project progress/stage" },
+    { "name": "configure", "description": "Configure automation settings" },
+    { "name": "open", "description": "Open DevForge Dashboard in browser" }
+  ]
+}
