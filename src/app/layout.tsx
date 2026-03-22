@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
-import { Sidebar } from "@/components/sidebar";
+import { TopNav } from "@/components/top-nav";
+import { FloatingActions } from "@/components/floating-actions";
 import "./globals.css";
 
 const inter = Inter({
@@ -19,10 +20,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`dark ${inter.variable}`}>
-      <body className="bg-slate-950 text-slate-50 min-h-screen antialiased font-sans">
-        <Sidebar />
-        <main className="ml-14 p-6">{children}</main>
+    <html lang="en" className={inter.variable}>
+      <body className="bg-[#f0f0e8] text-[#1a1a1a] min-h-screen antialiased font-sans">
+        <TopNav />
+        <FloatingActions />
+        <main className="max-w-7xl mx-auto px-6 py-8 pl-20">{children}</main>
       </body>
     </html>
   );

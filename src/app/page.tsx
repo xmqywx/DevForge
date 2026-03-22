@@ -62,17 +62,17 @@ export default function OverviewPage() {
 
   return (
     <div className="space-y-8">
-      <h1 className="text-2xl font-bold">Overview</h1>
+      <h1 className="text-3xl font-bold text-[#1a1a1a]">Overview</h1>
 
       <div className="grid grid-cols-4 gap-4">
-        <StatsCard label="Total Projects" value={stats.totalProjects} />
-        <StatsCard label="Active" value={stats.activeProjects} color="text-green-400" />
-        <StatsCard label="Open Issues" value={stats.openIssues} color="text-amber-400" />
-        <StatsCard label="Feedback" value={0} />
+        <StatsCard label="Total Projects" value={stats.totalProjects} subtitle="+2 this month" />
+        <StatsCard label="Active" value={stats.activeProjects} subtitle="+1 this month" />
+        <StatsCard label="Open Issues" value={stats.openIssues} subtitle="+3 this month" />
+        <StatsCard label="Feedback" value={0} subtitle="0 this month" />
       </div>
 
       <div>
-        <h2 className="text-lg font-semibold mb-4">Recent Projects</h2>
+        <h2 className="text-xl font-semibold text-[#1a1a1a] mb-4">Recent Projects</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {recentProjects.map((p) => (
             <ProjectCard
@@ -80,7 +80,7 @@ export default function OverviewPage() {
               slug={p.slug}
               name={p.name}
               description={p.description ?? ""}
-              icon={p.icon ?? "📦"}
+              icon={p.icon ?? ""}
               stage={p.stage ?? "idea"}
               progressPct={p.progressPct ?? 0}
               tags={(p.tags as string[]) ?? []}

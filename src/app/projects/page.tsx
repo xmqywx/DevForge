@@ -57,8 +57,8 @@ export default function ProjectsPage() {
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold">Projects</h1>
-        <span className="text-sm text-slate-400">{allProjects.length} projects</span>
+        <h1 className="text-3xl font-bold text-[#1a1a1a]">Projects</h1>
+        <span className="text-sm text-gray-500">{allProjects.length} projects</span>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -68,7 +68,7 @@ export default function ProjectsPage() {
             slug={p.slug}
             name={p.name}
             description={p.description ?? ""}
-            icon={p.icon ?? "📦"}
+            icon={p.icon ?? ""}
             stage={p.stage ?? "idea"}
             progressPct={p.progressPct ?? 0}
             tags={(p.tags as string[]) ?? []}

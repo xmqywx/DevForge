@@ -1,18 +1,18 @@
 "use client";
-import { Badge } from "@/components/ui/badge";
 
-const PRIORITY_COLORS: Record<string, string> = {
-  high: "bg-red-900/50 text-red-400",
-  medium: "bg-amber-900/50 text-amber-400",
-  low: "bg-slate-800 text-slate-400",
+const PRIORITY_DOT: Record<string, string> = {
+  high: "bg-[#ef4444]",
+  medium: "bg-[#eab308]",
+  low: "bg-[#9ca3af]",
 };
-const STATUS_COLORS: Record<string, string> = {
-  open: "bg-amber-900/50 text-amber-400",
-  "in-review": "bg-blue-900/50 text-blue-400",
-  "in-progress": "bg-purple-900/50 text-purple-400",
-  resolved: "bg-green-900/50 text-green-400",
-  "wont-fix": "bg-red-900/50 text-red-400",
-  deferred: "bg-stone-900/50 text-stone-400",
+
+const STATUS_PILL: Record<string, string> = {
+  open: "border border-gray-300 text-[#1a1a1a]",
+  "in-review": "bg-blue-100 text-blue-700",
+  "in-progress": "bg-[#c6e135] text-[#1a1a1a]",
+  resolved: "bg-emerald-100 text-emerald-700",
+  "wont-fix": "bg-gray-200 text-gray-500",
+  deferred: "border border-gray-300 text-gray-600",
 };
 
 interface Issue {
@@ -23,46 +23,46 @@ interface Issue {
   priority: string;
   source: string;
   createdAt: string;
+  projectName?: string;
 }
 
 export function IssueList({ issues }: { issues: Issue[] }) {
   return (
-    <div className="space-y-2">
+    <div className="space-y-3">
       {issues.map((issue) => (
         <div
           key={issue.id}
-          className="bg-[#1e293b] rounded-lg p-3 flex justify-between items-center border border-slate-800"
+          className="bg-white rounded-2xl shadow-sm p-4 flex items-center justify-between"
         >
-          <div className="flex items-center gap-3">
-            <div
-              className={`w-2 h-2 rounded-full ${issue.priority === "high" ? "bg-red-400" : issue.priority === "medium" ? "bg-amber-400" : "bg-slate-500"}`}
+          <div className="flex items-center gap-3 min-w-0">
+            <span
+              className={`w-3 h-3 rounded-full shrink-0 ${PRIORITY_DOT[issue.priority] ?? PRIORITY_DOT.low}`}
             />
-            <div>
-              <div className="text-sm">{issue.title}</div>
-              <div className="text-[11px] text-slate-500">
-                #{issue.id} · {issue.createdAt?.split("T")[0]}
-                {issue.source === "feedback" && " · 💬"}
+            <div className="min-w-0">
+              <div className="font-semibold text-[#1a1a1a] truncate">{issue.title}</div>
+              <div className="text-xs text-gray-400 mt-0.5">
+                {issue.projectName && (
+                  <span className="text-[#c6e135] font-medium">{issue.projectName} </span>
+                )}
+                #{issue.id}
               </div>
             </div>
           </div>
-          <div className="flex gap-1.5">
-            <Badge
-              variant="outline"
-              className={`text-[10px] ${STATUS_COLORS[issue.status] ?? ""}`}
+          <div className="flex items-center gap-3 shrink-0 ml-4">
+            <span className="text-xs text-gray-400">
+              #{issue.id}
+            </span>
+            <span
+              className={`px-3 py-1 rounded-full text-xs font-medium capitalize ${STATUS_PILL[issue.status] ?? STATUS_PILL.open}`}
             >
-              {issue.status}
-            </Badge>
-            <Badge
-              variant="outline"
-              className={`text-[10px] ${PRIORITY_COLORS[issue.priority] ?? ""}`}
-            >
-              {issue.priority}
-            </Badge>
+              {issue.status.replace("-", " ")}
+            </span>
+            <div className="w-8 h-8 rounded-full bg-gray-200 shrink-0" />
           </div>
         </div>
       ))}
       {issues.length === 0 && (
-        <div className="text-center text-sm text-slate-500 py-8">
+        <div className="text-center text-sm text-gray-400 py-8">
           No issues yet
         </div>
       )}
