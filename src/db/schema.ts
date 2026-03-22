@@ -31,7 +31,7 @@ export const issues = sqliteTable("issues", {
   title: text("title").notNull(),
   description: text("description").default(""),
   type: text("type", { enum: ["bug", "feature", "improvement", "question", "task", "note"] }).default("task"),
-  status: text("status", { enum: ["open", "in-review", "in-progress", "resolved", "wont-fix", "deferred"] }).default("open"),
+  status: text("status", { enum: ["open", "in-progress", "resolved", "wont-fix", "deferred", "closed"] }).default("open"),
   priority: text("priority", { enum: ["high", "medium", "low"] }).default("medium"),
   source: text("source", { enum: ["manual", "auto", "feedback"] }).default("manual"),
   feedbackId: integer("feedback_id"),
