@@ -15,7 +15,8 @@
     "./commands/df-summary.md",
     "./commands/df-progress.md",
     "./commands/df-configure.md",
-    "./commands/open.md"
+    "./commands/open.md",
+    "./commands/df-release.md"
   ],
   "homepage": "https://github.com/xmqywx/DevForge",
   "repository": "https://github.com/xmqywx/DevForge",

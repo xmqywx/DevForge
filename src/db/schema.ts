@@ -111,3 +111,14 @@ export const issueComments = sqliteTable("issue_comments", {
   images: text("images", { mode: "json" }).$type<string[]>().default([]),
   createdAt: text("created_at").default(sql`(datetime('now'))`),
 });
+
+export const releases = sqliteTable("releases", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  projectId: integer("project_id").notNull().references(() => projects.id, { onDelete: "cascade" }),
+  version: text("version").notNull(),
+  title: text("title").notNull(),
+  content: text("content").notNull(),
+  downloadUrl: text("download_url"),
+  publishedAt: text("published_at").default(sql`(datetime('now'))`),
+  createdAt: text("created_at").default(sql`(datetime('now'))`),
+});

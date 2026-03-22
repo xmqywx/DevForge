@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { db } from "../src/db/client";
-import { projects, issues, notes, gitSnapshots } from "../src/db/schema";
+import { projects, issues, notes, gitSnapshots, releases } from "../src/db/schema";
 import { eq, desc, sql, inArray, and } from "drizzle-orm";
 import { getNextActionableIssues, getBlockedIssues, getProjectWithGit, getOverviewStats } from "../src/lib/queries";
 import { seedFromScan } from "../src/db/seed";
@@ -273,7 +273,48 @@ export const TOOLS: ToolDef[] = [
     },
   },
 
-  // 8. devforge_scan
+  // 8. devforge_add_release
+  {
+    name: "devforge_add_release",
+    description: "Create a new release/changelog entry for a project. Use when a significant update is completed.",
+    inputSchema: {
+      project_slug: z.string().describe("Project slug"),
+      version: z.string().describe("Version number, e.g. v1.0.0"),
+      title: z.string().describe("Release title"),
+      content: z.string().describe("Markdown changelog content"),
+      download_url: z.string().optional().describe("Optional download link"),
+    },
+    handler: (args: {
+      project_slug: string;
+      version: string;
+      title: string;
+      content: string;
+      download_url?: string;
+    }) => {
+      const project = db
+        .select()
+        .from(projects)
+        .where(eq(projects.slug, args.project_slug))
+        .get();
+      if (!project) return { error: `Project '${args.project_slug}' not found` };
+
+      const result = db
+        .insert(releases)
+        .values({
+          projectId: project.id,
+          version: args.version,
+          title: args.title,
+          content: args.content,
+          downloadUrl: args.download_url ?? null,
+        })
+        .returning()
+        .get();
+
+      return { success: true, release: result };
+    },
+  },
+
+  // 9. devforge_scan
   {
     name: "devforge_scan",
     description: "Trigger a git repo scan to discover/update projects from local repositories.",
