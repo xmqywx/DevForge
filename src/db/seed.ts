@@ -66,10 +66,10 @@ export async function seedFromScan(
       created++;
     } else {
       projectId = existing.id;
-      // Update readme if it's empty and we found one
-      if (readme && !existing.readme) {
+      // Always update readme if found (could be new or changed)
+      if (readme) {
         db.update(projects)
-          .set({ readme })
+          .set({ readme, updatedAt: new Date().toISOString() })
           .where(eq(projects.id, projectId))
           .run();
       }

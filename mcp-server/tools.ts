@@ -374,4 +374,43 @@ export const TOOLS: ToolDef[] = [
       return { success: true, milestone: result };
     },
   },
+
+  // 11. devforge_update_readme
+  {
+    name: "devforge_update_readme",
+    description: "Update a project's README content. Can read from the project's README.md file or accept content directly.",
+    inputSchema: {
+      project_slug: z.string().describe("Project slug"),
+      content: z.string().optional().describe("README content in markdown. If omitted, reads from the project's README.md file."),
+    },
+    handler: (args: { project_slug: string; content?: string }) => {
+      const project = db.select().from(projects).where(eq(projects.slug, args.project_slug)).get();
+      if (!project) return { error: `Project '${args.project_slug}' not found` };
+
+      let readmeContent = args.content;
+
+      // If no content provided, try to read from project's README.md
+      if (!readmeContent && project.repoPath) {
+        const fs = require("fs");
+        const path = require("path");
+        const candidates = ["README.md", "readme.md", "Readme.md"];
+        for (const name of candidates) {
+          const filePath = path.join(project.repoPath, name);
+          if (fs.existsSync(filePath)) {
+            readmeContent = fs.readFileSync(filePath, "utf-8");
+            break;
+          }
+        }
+      }
+
+      if (!readmeContent) return { error: "No README content provided and no README.md found in project directory" };
+
+      db.update(projects)
+        .set({ readme: readmeContent, updatedAt: new Date().toISOString() })
+        .where(eq(projects.id, project.id))
+        .run();
+
+      return { success: true, length: readmeContent.length };
+    },
+  },
 ];
