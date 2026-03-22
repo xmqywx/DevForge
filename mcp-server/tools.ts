@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { db } from "../src/db/client";
-import { projects, issues, notes, gitSnapshots, releases } from "../src/db/schema";
+import { projects, issues, notes, gitSnapshots, releases, milestones } from "../src/db/schema";
 import { eq, desc, sql, inArray, and } from "drizzle-orm";
 import { getNextActionableIssues, getBlockedIssues, getProjectWithGit, getOverviewStats } from "../src/lib/queries";
 import { seedFromScan } from "../src/db/seed";
@@ -328,6 +328,50 @@ export const TOOLS: ToolDef[] = [
         created: result.created,
         updated: result.updated,
       };
+    },
+  },
+
+  // 10. devforge_add_milestone
+  {
+    name: "devforge_add_milestone",
+    description: "Add a roadmap milestone to a project's evolution timeline.",
+    inputSchema: {
+      project_slug: z.string().describe("Project slug"),
+      title: z.string().describe("Milestone title"),
+      description: z.string().describe("Milestone description"),
+      status: z.enum(["completed", "current", "planned"]).describe("Milestone status"),
+      date: z.string().describe("Date like 2026-03 or 2026-Q2"),
+      icon: z.enum(["milestone", "launch", "pivot", "idea", "integration"]).optional().describe("Icon type"),
+    },
+    handler: (args: {
+      project_slug: string;
+      title: string;
+      description: string;
+      status: string;
+      date: string;
+      icon?: string;
+    }) => {
+      const project = db
+        .select()
+        .from(projects)
+        .where(eq(projects.slug, args.project_slug))
+        .get();
+      if (!project) return { error: `Project '${args.project_slug}' not found` };
+
+      const result = db
+        .insert(milestones)
+        .values({
+          projectId: project.id,
+          title: args.title,
+          description: args.description,
+          status: args.status as any,
+          date: args.date,
+          icon: args.icon ?? "milestone",
+        })
+        .returning()
+        .get();
+
+      return { success: true, milestone: result };
     },
   },
 ];

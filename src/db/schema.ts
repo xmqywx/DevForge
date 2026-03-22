@@ -122,3 +122,14 @@ export const releases = sqliteTable("releases", {
   publishedAt: text("published_at").default(sql`(datetime('now'))`),
   createdAt: text("created_at").default(sql`(datetime('now'))`),
 });
+
+export const milestones = sqliteTable("milestones", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  projectId: integer("project_id").notNull().references(() => projects.id, { onDelete: "cascade" }),
+  title: text("title").notNull(),
+  description: text("description").default(""),
+  status: text("status", { enum: ["completed", "current", "planned"] }).default("planned"),
+  date: text("date").notNull(),
+  icon: text("icon").default("milestone"),
+  createdAt: text("created_at").default(sql`(datetime('now'))`),
+});
