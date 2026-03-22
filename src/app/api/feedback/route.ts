@@ -12,7 +12,9 @@ export async function GET(request: NextRequest) {
   const status = request.nextUrl.searchParams.get("status");
   const type = request.nextUrl.searchParams.get("type");
 
-  const conditions = [ne(feedback.status, "spam")];
+  const includeSpam = request.nextUrl.searchParams.get("includeSpam") === "true";
+  const conditions: ReturnType<typeof ne>[] = [];
+  if (!includeSpam) conditions.push(ne(feedback.status, "spam"));
   if (projectId) conditions.push(eq(feedback.projectId, Number(projectId)));
   if (status) conditions.push(eq(feedback.status, status as typeof feedback.status.enumValues[number]));
   if (type) conditions.push(eq(feedback.type, type as typeof feedback.type.enumValues[number]));
