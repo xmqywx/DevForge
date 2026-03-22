@@ -3,13 +3,29 @@ import { projects, gitSnapshots } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { scanGitRepos } from "@/lib/scanner";
 import { homedir } from "os";
-import { resolve } from "path";
+import { resolve, join } from "path";
+import { readFileSync, existsSync } from "fs";
 
 function toSlug(name: string): string {
   return name
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/^-+|-+$/g, "");
+}
+
+function readReadme(repoPath: string): string | null {
+  const candidates = ["README.md", "readme.md", "Readme.md", "README.MD", "README"];
+  for (const name of candidates) {
+    const filePath = join(repoPath, name);
+    if (existsSync(filePath)) {
+      try {
+        return readFileSync(filePath, "utf-8");
+      } catch {
+        return null;
+      }
+    }
+  }
+  return null;
 }
 
 export async function seedFromScan(
@@ -23,6 +39,7 @@ export async function seedFromScan(
 
   for (const repo of repos) {
     const slug = toSlug(repo.name);
+    const readme = readReadme(repo.path);
 
     const existing = db
       .select()
@@ -40,6 +57,7 @@ export async function seedFromScan(
           name: repo.name,
           repoPath: repo.path,
           githubUrl: repo.remoteUrl || null,
+          readme: readme ?? "",
         })
         .returning({ id: projects.id })
         .get();
@@ -48,6 +66,13 @@ export async function seedFromScan(
       created++;
     } else {
       projectId = existing.id;
+      // Update readme if it's empty and we found one
+      if (readme && !existing.readme) {
+        db.update(projects)
+          .set({ readme })
+          .where(eq(projects.id, projectId))
+          .run();
+      }
       updated++;
     }
 
