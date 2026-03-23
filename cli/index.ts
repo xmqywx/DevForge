@@ -87,4 +87,21 @@ program.command("open")
     require("child_process").execSync("open http://localhost:3102");
   });
 
+// devforge sync [direction]
+program
+  .command("sync [direction]")
+  .description("Sync with server (push/pull/both)")
+  .action(async (direction?: string) => {
+    const { execSync } = require("child_process");
+    console.log(`Syncing (${direction ?? "both"})...`);
+    try {
+      execSync(
+        `cd ${__dirname}/.. && node_modules/.bin/tsx scripts/sync.ts ${direction ?? "both"}`,
+        { encoding: "utf-8", stdio: "inherit", timeout: 30000 },
+      );
+    } catch (error: any) {
+      console.error("Sync failed:", error.message);
+    }
+  });
+
 program.parse();

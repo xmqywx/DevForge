@@ -21,6 +21,7 @@ export const projects = sqliteTable("projects", {
   autoSessionSummary: text("auto_session_summary", { enum: ["on", "off", "default"] }).default("default"),
   autoLoadContext: text("auto_load_context", { enum: ["on", "off", "default"] }).default("default"),
   autoUpdateProgress: text("auto_update_progress", { enum: ["on", "off", "default"] }).default("default"),
+  readme: text("readme").default(""),
   createdAt: text("created_at").default(sql`(datetime('now'))`),
   updatedAt: text("updated_at").default(sql`(datetime('now'))`),
 });
@@ -83,8 +84,21 @@ export const feedback = sqliteTable("feedback", {
   images: text("images", { mode: "json" }).$type<string[]>().default([]),
   isConverted: integer("is_converted", { mode: "boolean" }).default(false),
   issueId: integer("issue_id"),
+  avatarUrl: text("avatar_url"),
   createdAt: text("created_at").default(sql`(datetime('now'))`),
   updatedAt: text("updated_at").default(sql`(datetime('now'))`),
+});
+
+export const feedbackReplies = sqliteTable("feedback_replies", {
+  id: integer("id").primaryKey({ autoIncrement: true }),
+  feedbackId: integer("feedback_id").notNull().references(() => feedback.id, { onDelete: "cascade" }),
+  authorName: text("author_name").default("匿名"),
+  authorIp: text("author_ip"),
+  isOwner: integer("is_owner", { mode: "boolean" }).default(false),
+  content: text("content").notNull(),
+  images: text("images", { mode: "json" }).$type<string[]>().default([]),
+  avatarUrl: text("avatar_url"),
+  createdAt: text("created_at").default(sql`(datetime('now'))`),
 });
 
 export const feedbackVotes = sqliteTable("feedback_votes", {
@@ -109,6 +123,7 @@ export const issueComments = sqliteTable("issue_comments", {
   isOwner: integer("is_owner", { mode: "boolean" }).default(false),
   content: text("content").notNull(),
   images: text("images", { mode: "json" }).$type<string[]>().default([]),
+  avatarUrl: text("avatar_url"),
   createdAt: text("created_at").default(sql`(datetime('now'))`),
 });
 

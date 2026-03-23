@@ -413,4 +413,33 @@ export const TOOLS: ToolDef[] = [
       return { success: true, length: readmeContent.length };
     },
   },
+
+  // 12. devforge_sync
+  {
+    name: "devforge_sync",
+    description:
+      "Sync data between local SQLite and server PostgreSQL. Push projects/issues/notes to server, pull feedback back.",
+    inputSchema: {
+      direction: z
+        .enum(["push", "pull", "both"])
+        .optional()
+        .describe(
+          "Sync direction: push (local→server), pull (server→local), or both",
+        ),
+    },
+    handler: async (args: { direction?: string }) => {
+      const { execSync } = require("child_process");
+      const path = require("path");
+      const dir = path.resolve(__dirname, "..");
+      try {
+        const result = execSync(
+          `cd ${dir} && node_modules/.bin/tsx scripts/sync.ts ${args.direction ?? "both"}`,
+          { encoding: "utf-8", timeout: 30000 },
+        );
+        return { success: true, output: result };
+      } catch (error: any) {
+        return { error: error.message };
+      }
+    },
+  },
 ];
