@@ -61,7 +61,7 @@ export function getProjectWithGit(slug: string) {
     .where(
       and(
         eq(issues.projectId, project.id),
-        inArray(issues.status, ["open", "in-progress", "in-review"])
+        inArray(issues.status, ["open", "in-progress"] as const)
       )
     )
     .get();
@@ -85,7 +85,7 @@ export function getOverviewStats() {
     db
       .select({ count: sql<number>`count(*)` })
       .from(issues)
-      .where(inArray(issues.status, ["open", "in-progress", "in-review"]))
+      .where(inArray(issues.status, ["open", "in-progress"] as const))
       .get()?.count ?? 0;
 
   return { totalProjects, activeProjects, openIssues };

@@ -17,8 +17,8 @@ program.command("status [project]")
       const project = db.select().from(projects).where(eq(projects.slug, projectSlug)).get();
       if (!project) { console.error(`Project '${projectSlug}' not found`); process.exit(1); }
       const openIssues = db.select().from(issues)
-        .where(eq(issues.projectId, project.id))
-        .where(inArray(issues.status, ["open", "in-progress", "in-review"])).all();
+        .where(sql`${issues.projectId} = ${project.id} AND ${issues.status} IN ('open', 'in-progress')`)
+        .all();
       console.log(`\n  ${project.name} | ${project.stage} | ${project.progressPct}%`);
       console.log(`  Open issues: ${openIssues.length}`);
       openIssues.forEach(i => console.log(`    [${i.priority}] #${i.id} ${i.title}`));
@@ -52,13 +52,13 @@ issueCmd.command("add <project> <title>")
 issueCmd.command("list [project]")
   .description("List issues")
   .action((projectSlug?: string) => {
-    let q = db.select().from(issues).where(inArray(issues.status, ["open", "in-progress", "in-review"]));
-    if (projectSlug) {
-      const project = db.select().from(projects).where(eq(projects.slug, projectSlug)).get();
-      if (!project) { console.error(`Not found`); process.exit(1); }
-      q = q.where(eq(issues.projectId, project.id));
-    }
-    const results = q.orderBy(sql`CASE ${issues.priority} WHEN 'high' THEN 0 WHEN 'medium' THEN 1 ELSE 2 END`).all();
+    const project = projectSlug ? db.select().from(projects).where(eq(projects.slug, projectSlug)).get() : null;
+    if (projectSlug && !project) { console.error(`Not found`); process.exit(1); }
+    const results = db.select().from(issues)
+      .where(project
+        ? sql`${issues.status} IN ('open', 'in-progress') AND ${issues.projectId} = ${project.id}`
+        : sql`${issues.status} IN ('open', 'in-progress')`)
+      .orderBy(sql`CASE ${issues.priority} WHEN 'high' THEN 0 WHEN 'medium' THEN 1 ELSE 2 END`).all();
     results.forEach(i => console.log(`  [${i.priority}] #${i.id} ${i.title} (${i.status})`));
     if (results.length === 0) console.log("  No open issues");
   });

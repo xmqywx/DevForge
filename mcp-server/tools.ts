@@ -58,7 +58,7 @@ export const TOOLS: ToolDef[] = [
               eq(issues.projectId,
                 db.select({ id: projects.id }).from(projects).where(eq(projects.slug, p.slug)).get()!.id
               ),
-              inArray(issues.status, ["open", "in-progress", "in-review"])
+              inArray(issues.status, ["open", "in-progress"] as const)
             )
           )
           .get();
@@ -84,7 +84,7 @@ export const TOOLS: ToolDef[] = [
         .where(
           and(
             eq(issues.projectId, project.id),
-            inArray(issues.status, ["open", "in-progress", "in-review"])
+            inArray(issues.status, ["open", "in-progress"] as const)
           )
         )
         .orderBy(
@@ -164,7 +164,7 @@ export const TOOLS: ToolDef[] = [
     description: "Update an issue's status, priority, or description. Auto-sets resolvedAt when status changes to resolved.",
     inputSchema: {
       id: z.number().describe("Issue ID"),
-      status: z.enum(["open", "in-review", "in-progress", "resolved", "wont-fix", "deferred"]).optional().describe("New status"),
+      status: z.enum(["open", "in-progress", "resolved", "wont-fix", "deferred", "closed"]).optional().describe("New status"),
       priority: z.enum(["high", "medium", "low"]).optional().describe("New priority"),
       description: z.string().optional().describe("New description"),
     },
