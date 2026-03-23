@@ -28,7 +28,7 @@ import {
   issueVotes,
   issueComments,
 } from "../src/db/schema";
-import { eq } from "drizzle-orm";
+import { eq, and } from "drizzle-orm";
 
 const SERVER_URL =
   process.env.DEVFORGE_SERVER_URL ?? "http://106.54.19.137:3104";
@@ -130,17 +130,22 @@ async function pull() {
   let issueVotesCount = 0;
   let issueCommentsCount = 0;
 
-  // Upsert feedback
+  // Upsert feedback — match by title + projectId (IDs differ between local and server)
   if (data.feedback) {
     for (const fb of data.feedback) {
       const existing = db
         .select()
         .from(feedback)
-        .where(eq(feedback.id, fb.id))
+        .where(and(
+          eq(feedback.title, fb.title),
+          eq(feedback.projectId, fb.projectId)
+        ))
         .get();
       if (!existing) {
         try {
-          db.insert(feedback).values(fb).run();
+          // Don't use server's ID — let local auto-increment
+          const { id, ...rest } = fb;
+          db.insert(feedback).values(rest).run();
           feedbackCount++;
         } catch (e: any) {
           // Skip if foreign key constraint fails (project not local)
