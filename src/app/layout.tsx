@@ -24,7 +24,7 @@ export default function RootLayout({
       <body className="bg-[#f0f0e8] text-[#1a1a1a] min-h-screen antialiased font-sans">
         <TopNav />
         <FloatingActions />
-        <main className="max-w-7xl mx-auto px-6 py-8 pl-20">{children}</main>
+        <main className="max-w-7xl mx-auto px-6 py-8">{children}</main>
       </body>
     </html>
   );

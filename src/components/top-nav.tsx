@@ -8,9 +8,12 @@ const NAV_ITEMS = [
   { label: "Overview", href: "/" },
   { label: "Projects", href: "/projects" },
   { label: "Issues", href: "/issues" },
-  { label: "Timeline", href: "/timeline" },
-  { label: "Feedback", href: "/feedback-admin" },
+  { label: "Feedback", href: "/feedback" },
+  { label: "Releases", href: "/releases" },
+  { label: "Milestones", href: "/milestones" },
+  { label: "Sync", href: "/sync" },
   { label: "Settings", href: "/settings" },
+  { label: "Docs", href: "/docs" },
 ];
 
 export function TopNav() {
@@ -38,7 +41,7 @@ export function TopNav() {
                 key={item.href}
                 href={item.href}
                 className={cn(
-                  "px-4 py-1.5 rounded-full text-sm font-medium transition-colors",
+                  "px-3 py-1.5 rounded-full text-xs font-medium transition-colors whitespace-nowrap",
                   isActive
                     ? "bg-[#c6e135] text-[#1a1a1a]"
                     : "text-gray-500 hover:text-gray-700"
