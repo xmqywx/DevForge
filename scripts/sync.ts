@@ -222,8 +222,31 @@ async function pull() {
     }
   }
 
+  // Upsert feedback-created issues (created on server when user submits feedback)
+  let feedbackIssuesCount = 0;
+  if (data.feedback_issues) {
+    for (const i of data.feedback_issues) {
+      const existing = db
+        .select()
+        .from(issues)
+        .where(and(
+          eq(issues.title, i.title),
+          eq(issues.projectId, i.projectId),
+          eq(issues.source, "feedback")
+        ))
+        .get();
+      if (!existing) {
+        try {
+          const { id, ...rest } = i;
+          db.insert(issues).values(rest).run();
+          feedbackIssuesCount++;
+        } catch (e: any) {}
+      }
+    }
+  }
+
   console.log(
-    `  Pulled: ${feedbackCount} new feedback, ${repliesCount} replies, ${feedbackVotesCount} feedback votes, ${issueCommentsCount} comments, ${issueVotesCount} issue votes`,
+    `  Pulled: ${feedbackCount} new feedback, ${feedbackIssuesCount} feedback issues, ${repliesCount} replies, ${feedbackVotesCount} feedback votes, ${issueCommentsCount} comments, ${issueVotesCount} issue votes`,
   );
 }
 
