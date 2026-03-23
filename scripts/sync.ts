@@ -1,6 +1,19 @@
 #!/usr/bin/env npx tsx
 // Bidirectional sync: push local data to server, pull feedback back
 
+// Load .env.local
+import { readFileSync, existsSync } from "fs";
+import { resolve } from "path";
+const envPath = resolve(__dirname, "../.env.local");
+if (existsSync(envPath)) {
+  for (const line of readFileSync(envPath, "utf-8").split("\n")) {
+    const trimmed = line.trim();
+    if (!trimmed || trimmed.startsWith("#")) continue;
+    const [key, ...rest] = trimmed.split("=");
+    if (key && !process.env[key]) process.env[key] = rest.join("=");
+  }
+}
+
 import { db } from "../src/db/client";
 import {
   projects,
