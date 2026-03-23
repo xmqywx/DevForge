@@ -17,7 +17,8 @@
     "./commands/df-configure.md",
     "./commands/open.md",
     "./commands/df-release.md",
-    "./commands/df-sync.md"
+    "./commands/df-sync.md",
+    "./commands/df-scan.md"
   ],
   "homepage": "https://github.com/xmqywx/DevForge",
   "repository": "https://github.com/xmqywx/DevForge",
