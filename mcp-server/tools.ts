@@ -4,6 +4,17 @@ import { projects, issues, notes, gitSnapshots, releases, milestones } from "../
 import { eq, desc, sql, inArray, and } from "drizzle-orm";
 import { getNextActionableIssues, getBlockedIssues, getProjectWithGit, getOverviewStats } from "../src/lib/queries.js";
 import { seedFromScan } from "../src/db/seed.js";
+import { execSync } from "child_process";
+import { resolve } from "path";
+
+// Auto-sync to server after write operations (non-blocking)
+function autoSync() {
+  try {
+    const dir = resolve(__dirname, "..");
+    const { exec } = require("child_process");
+    exec(`bash ${dir}/hooks/post-sync.sh`, { timeout: 15000 });
+  } catch {}
+}
 
 type ToolDef = {
   name: string;
@@ -143,7 +154,7 @@ export const TOOLS: ToolDef[] = [
         .returning()
         .get();
 
-      return { created: result };
+      autoSync(); return { created: result };
     },
   },
 
@@ -180,7 +191,7 @@ export const TOOLS: ToolDef[] = [
         .returning()
         .get();
 
-      return { updated: result };
+      autoSync(); return { updated: result };
     },
   },
 
@@ -213,7 +224,7 @@ export const TOOLS: ToolDef[] = [
         .returning()
         .get();
 
-      return { created: result };
+      autoSync(); return { created: result };
     },
   },
 
@@ -254,7 +265,7 @@ export const TOOLS: ToolDef[] = [
         .returning()
         .get();
 
-      return { updated: result };
+      autoSync(); return { updated: result };
     },
   },
 
@@ -310,7 +321,7 @@ export const TOOLS: ToolDef[] = [
         .returning()
         .get();
 
-      return { success: true, release: result };
+      autoSync(); return { success: true, release: result };
     },
   },
 
@@ -371,7 +382,7 @@ export const TOOLS: ToolDef[] = [
         .returning()
         .get();
 
-      return { success: true, milestone: result };
+      autoSync(); return { success: true, milestone: result };
     },
   },
 
@@ -410,7 +421,7 @@ export const TOOLS: ToolDef[] = [
         .where(eq(projects.id, project.id))
         .run();
 
-      return { success: true, length: readmeContent.length };
+      autoSync(); return { success: true, length: readmeContent.length };
     },
   },
 
