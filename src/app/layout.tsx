@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import { TopNav } from "@/components/top-nav";
 import { FloatingActions } from "@/components/floating-actions";
+import { I18nProvider } from "@/lib/i18n";
 import "./globals.css";
 
 const inter = Inter({
@@ -22,9 +23,11 @@ export default function RootLayout({
   return (
     <html lang="en" className={inter.variable}>
       <body className="bg-[#f0f0e8] text-[#1a1a1a] min-h-screen antialiased font-sans">
-        <TopNav />
-        <FloatingActions />
-        <main className="max-w-7xl mx-auto px-6 py-8">{children}</main>
+        <I18nProvider>
+          <TopNav />
+          <FloatingActions />
+          <main className="max-w-7xl mx-auto px-6 py-8">{children}</main>
+        </I18nProvider>
       </body>
     </html>
   );

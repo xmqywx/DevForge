@@ -3,21 +3,24 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { LuCode, LuBell } from "react-icons/lu";
 import { cn } from "@/lib/utils";
+import { useI18n } from "@/lib/i18n";
+import { LanguageSwitcher } from "@/components/language-switcher";
 
 const NAV_ITEMS = [
-  { label: "Overview", href: "/" },
-  { label: "Projects", href: "/projects" },
-  { label: "Issues", href: "/issues" },
-  { label: "Feedback", href: "/feedback" },
-  { label: "Releases", href: "/releases" },
-  { label: "Milestones", href: "/milestones" },
-  { label: "Sync", href: "/sync" },
-  { label: "Settings", href: "/settings" },
-  { label: "Docs", href: "/docs" },
+  { key: "nav.overview", href: "/" },
+  { key: "nav.projects", href: "/projects" },
+  { key: "nav.issues", href: "/issues" },
+  { key: "nav.feedback", href: "/feedback" },
+  { key: "nav.releases", href: "/releases" },
+  { key: "nav.milestones", href: "/milestones" },
+  { key: "nav.sync", href: "/sync" },
+  { key: "nav.settings", href: "/settings" },
+  { key: "nav.docs", href: "/docs" },
 ];
 
 export function TopNav() {
   const pathname = usePathname();
+  const { t } = useI18n();
 
   return (
     <nav className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-200/60">
@@ -47,14 +50,15 @@ export function TopNav() {
                     : "text-gray-500 hover:text-gray-700"
                 )}
               >
-                {item.label}
+                {t(item.key)}
               </Link>
             );
           })}
         </div>
 
-        {/* Right: avatar + bell */}
+        {/* Right: language switcher + bell + avatar */}
         <div className="flex items-center gap-3">
+          <LanguageSwitcher />
           <button className="w-9 h-9 rounded-full flex items-center justify-center hover:bg-gray-100 transition-colors">
             <LuBell className="w-5 h-5 text-gray-500" />
           </button>
