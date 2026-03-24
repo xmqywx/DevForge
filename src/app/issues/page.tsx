@@ -9,13 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+// Native select used in drawer to avoid portal/overflow z-index issues
 
 interface Project {
   id: number;
@@ -147,50 +141,39 @@ function IssueDrawer({
           <div className="grid grid-cols-3 gap-3">
             <div className="flex flex-col gap-1.5">
               <Label>Status</Label>
-              <Select value={status} onValueChange={(v) => v && setStatus(v)}>
-                <SelectTrigger className="w-full">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {["open", "in-progress", "resolved", "closed", "wont-fix", "deferred"].map(
-                    (s) => (
-                      <SelectItem key={s} value={s}>
-                        {s.replace(/-/g, " ")}
-                      </SelectItem>
-                    )
-                  )}
-                </SelectContent>
-              </Select>
+              <select
+                value={status}
+                onChange={(e) => setStatus(e.target.value)}
+                className="h-8 w-full rounded-lg border border-input bg-transparent px-2.5 text-sm outline-none focus:border-ring focus:ring-2 focus:ring-ring/50 capitalize"
+              >
+                {["open", "in-progress", "resolved", "closed", "wont-fix", "deferred"].map((s) => (
+                  <option key={s} value={s}>{s.replace(/-/g, " ")}</option>
+                ))}
+              </select>
             </div>
             <div className="flex flex-col gap-1.5">
               <Label>Type</Label>
-              <Select value={type} onValueChange={(v) => v && setType(v)}>
-                <SelectTrigger className="w-full">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {TYPE_LABELS.map((t) => (
-                    <SelectItem key={t} value={t}>
-                      {t.charAt(0).toUpperCase() + t.slice(1)}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <select
+                value={type}
+                onChange={(e) => setType(e.target.value)}
+                className="h-8 w-full rounded-lg border border-input bg-transparent px-2.5 text-sm outline-none focus:border-ring focus:ring-2 focus:ring-ring/50 capitalize"
+              >
+                {TYPE_LABELS.map((t) => (
+                  <option key={t} value={t}>{t.charAt(0).toUpperCase() + t.slice(1)}</option>
+                ))}
+              </select>
             </div>
             <div className="flex flex-col gap-1.5">
               <Label>Priority</Label>
-              <Select value={priority} onValueChange={(v) => v && setPriority(v)}>
-                <SelectTrigger className="w-full">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {PRIORITY_LABELS.map((p) => (
-                    <SelectItem key={p} value={p}>
-                      {p.charAt(0).toUpperCase() + p.slice(1)}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <select
+                value={priority}
+                onChange={(e) => setPriority(e.target.value)}
+                className="h-8 w-full rounded-lg border border-input bg-transparent px-2.5 text-sm outline-none focus:border-ring focus:ring-2 focus:ring-ring/50 capitalize"
+              >
+                {PRIORITY_LABELS.map((p) => (
+                  <option key={p} value={p}>{p.charAt(0).toUpperCase() + p.slice(1)}</option>
+                ))}
+              </select>
             </div>
           </div>
 
