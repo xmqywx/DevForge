@@ -52,7 +52,7 @@ export function FloatingActions() {
   };
 
   const handleCalendar = () => {
-    router.push("/milestones");
+    router.push("/calendar");
   };
 
   return (
@@ -131,9 +131,9 @@ export function FloatingActions() {
       {/* Calendar / Milestones */}
       <button
         onClick={handleCalendar}
-        title="Milestones"
+        title="Calendar"
         className={`w-12 h-12 rounded-full flex items-center justify-center transition-colors shadow-lg ${
-          pathname.startsWith("/milestones") ? "bg-[#c6e135] text-[#1a1a1a]" : "bg-[#1a1a1a] text-white hover:bg-[#333]"
+          pathname.startsWith("/calendar") ? "bg-[#c6e135] text-[#1a1a1a]" : "bg-[#1a1a1a] text-white hover:bg-[#333]"
         }`}
       >
         <LuCalendar className="w-5 h-5" />

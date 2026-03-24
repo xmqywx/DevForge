@@ -13,6 +13,7 @@ const NAV_ITEMS = [
   { key: "nav.feedback", href: "/feedback" },
   { key: "nav.releases", href: "/releases" },
   { key: "nav.milestones", href: "/milestones" },
+  { key: "nav.calendar", href: "/calendar" },
   { key: "nav.sync", href: "/sync" },
   { key: "nav.settings", href: "/settings" },
   { key: "nav.docs", href: "/docs" },
