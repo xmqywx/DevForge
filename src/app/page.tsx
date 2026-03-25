@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { useI18n } from "@/lib/i18n";
 
 // ---- Types ----
 
@@ -131,15 +132,17 @@ function ActionButton({ label, onClick, href, loading, variant = "secondary" }: 
 // ---- Main Page ----
 
 export default function OverviewPage() {
+  const { t } = useI18n();
   const [data, setData] = useState<OverviewData | null>(null);
   const [loading, setLoading] = useState(true);
-  const [lastSync, setLastSync] = useState<string>("Never");
+  const [lastSync, setLastSync] = useState<string>("");
   const [actionState, setActionState] = useState<Record<string, boolean>>({});
 
   useEffect(() => {
     // Read last sync time from localStorage
     const stored = localStorage.getItem("devforge_last_sync");
     if (stored) setLastSync(relativeTime(stored));
+    else setLastSync(t("overview.never"));
 
     // Fetch overview data
     fetch("/api/overview")
@@ -175,52 +178,52 @@ export default function OverviewPage() {
   return (
     <div className="space-y-8">
       <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold text-[#1a1a1a]">Overview</h1>
-        <span className="text-sm text-gray-400">Last sync: {lastSync}</span>
+        <h1 className="text-3xl font-bold text-[#1a1a1a]">{t("overview.title")}</h1>
+        <span className="text-sm text-gray-400">{t("overview.lastSync")}: {lastSync || t("overview.never")}</span>
       </div>
 
       {/* Stats Row */}
       <div className="flex gap-4">
-        <StatsCard label="Total Projects" value={loading ? "—" : (stats?.totalProjects ?? 0)} />
-        <StatsCard label="Public" value={loading ? "—" : (stats?.publicProjects ?? 0)} />
-        <StatsCard label="Open Issues" value={loading ? "—" : (stats?.openIssues ?? 0)} />
-        <StatsCard label="Unread Feedback" value={loading ? "—" : (stats?.unreadFeedback ?? 0)} />
+        <StatsCard label={t("overview.totalProjects")} value={loading ? "—" : (stats?.totalProjects ?? 0)} />
+        <StatsCard label={t("overview.publicProjects")} value={loading ? "—" : (stats?.publicProjects ?? 0)} />
+        <StatsCard label={t("overview.openIssues")} value={loading ? "—" : (stats?.openIssues ?? 0)} />
+        <StatsCard label={t("overview.unreadFeedback")} value={loading ? "—" : (stats?.unreadFeedback ?? 0)} />
         <div className="bg-[#c6e135] rounded-2xl shadow-sm p-6 flex-1 min-w-0">
-          <div className="text-sm text-[#1a1a1a]/60 uppercase tracking-wide mb-1">Last Sync</div>
-          <div className="text-xl font-bold text-[#1a1a1a] truncate">{lastSync}</div>
+          <div className="text-sm text-[#1a1a1a]/60 uppercase tracking-wide mb-1">{t("overview.lastSync")}</div>
+          <div className="text-xl font-bold text-[#1a1a1a] truncate">{lastSync || t("overview.never")}</div>
         </div>
       </div>
 
       {/* Quick Actions */}
       <div className="bg-white rounded-2xl shadow-sm p-5">
         <h2 className="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-4">
-          Quick Actions
+          {t("overview.quickActions")}
         </h2>
         <div className="flex gap-3 flex-wrap">
           <ActionButton
-            label={actionState.scan ? "Scanning..." : "Scan Git"}
+            label={actionState.scan ? t("overview.scanning") : t("overview.scanGit")}
             onClick={() => runAction("scan", "/api/scan")}
             loading={actionState.scan}
             variant="primary"
           />
           <ActionButton
-            label={actionState.push ? "Pushing..." : "Push to Server"}
+            label={actionState.push ? t("overview.pushing") : t("overview.pushServer")}
             onClick={() => runAction("push", "/api/sync/push")}
             loading={actionState.push}
           />
           <ActionButton
-            label={actionState.pull ? "Pulling..." : "Pull Feedback"}
+            label={actionState.pull ? t("overview.pulling") : t("overview.pullFeedback")}
             onClick={() => runAction("pull", "/api/sync/pull")}
             loading={actionState.pull}
           />
-          <ActionButton label="New Issue" href="/issues" />
-          <ActionButton label="New Release" href="/releases" />
+          <ActionButton label={t("issues.newIssue")} href="/issues" />
+          <ActionButton label={t("overview.newRelease")} href="/releases" />
         </div>
       </div>
 
       {/* Recent Activity Timeline */}
       <div className="bg-white rounded-2xl shadow-sm p-6">
-        <h2 className="text-xl font-semibold text-[#1a1a1a] mb-5">Recent Activity</h2>
+        <h2 className="text-xl font-semibold text-[#1a1a1a] mb-5">{t("overview.recentActivity")}</h2>
 
         {loading ? (
           <div className="space-y-4">
@@ -236,7 +239,7 @@ export default function OverviewPage() {
           </div>
         ) : activity.length === 0 ? (
           <p className="text-gray-400 text-sm py-4 text-center">
-            No recent activity. Try scanning your git repos or pulling feedback.
+            {t("overview.noActivity")}
           </p>
         ) : (
           <div className="space-y-1">

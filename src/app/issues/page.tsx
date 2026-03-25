@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useCallback, useRef } from "react";
 import { LuSearch, LuPlus, LuX, LuChevronRight, LuSend } from "react-icons/lu";
+import { useI18n } from "@/lib/i18n";
 import { KanbanBoard } from "@/components/kanban-board";
 import { KanbanIssue } from "@/components/kanban-card";
 import { IssueCreateDialog } from "@/components/issue-create-dialog";
@@ -82,6 +83,7 @@ function IssueDrawer({
   onClose: () => void;
   onUpdated: (updated: KanbanIssue) => void;
 }) {
+  const { t } = useI18n();
   const [title, setTitle] = useState(issue.title);
   const [description, setDescription] = useState(issue.description ?? "");
   const [type, setType] = useState(issue.type);
@@ -150,10 +152,10 @@ function IssueDrawer({
       if (!res.ok) throw new Error(await res.text());
       const updated = await res.json();
       onUpdated(updated);
-      setSaveMsg("Saved!");
+      setSaveMsg(t("issues.saved"));
       setTimeout(() => setSaveMsg(""), 2000);
     } catch {
-      setSaveMsg("Failed to save.");
+      setSaveMsg(t("issues.saveFailed"));
     } finally {
       setSaving(false);
     }
@@ -192,7 +194,7 @@ function IssueDrawer({
         <div className="flex-1 px-6 py-5 flex flex-col gap-5">
           {/* Title */}
           <div className="flex flex-col gap-1.5">
-            <Label>Title</Label>
+            <Label>{t("issues.fieldTitle")}</Label>
             <Input
               value={title}
               onChange={(e) => setTitle(e.target.value)}
@@ -201,50 +203,50 @@ function IssueDrawer({
 
           {/* Description */}
           <div className="flex flex-col gap-1.5">
-            <Label>Description</Label>
+            <Label>{t("issues.fieldDescription")}</Label>
             <Textarea
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               rows={5}
-              placeholder="Add details..."
+              placeholder={t("issues.addDetails")}
             />
           </div>
 
           {/* Metadata row */}
           <div className="grid grid-cols-3 gap-3">
             <div className="flex flex-col gap-1.5">
-              <Label>Status</Label>
+              <Label>{t("issues.fieldStatus")}</Label>
               <select
                 value={status}
                 onChange={(e) => setStatus(e.target.value)}
                 className="h-8 w-full rounded-lg border border-input bg-transparent px-2.5 text-sm outline-none focus:border-ring focus:ring-2 focus:ring-ring/50 capitalize"
               >
                 {["open", "in-progress", "resolved", "closed", "wont-fix", "deferred"].map((s) => (
-                  <option key={s} value={s}>{s.replace(/-/g, " ")}</option>
+                  <option key={s} value={s}>{t(`status.${s}`)}</option>
                 ))}
               </select>
             </div>
             <div className="flex flex-col gap-1.5">
-              <Label>Type</Label>
+              <Label>{t("issues.fieldType")}</Label>
               <select
                 value={type}
                 onChange={(e) => setType(e.target.value)}
                 className="h-8 w-full rounded-lg border border-input bg-transparent px-2.5 text-sm outline-none focus:border-ring focus:ring-2 focus:ring-ring/50 capitalize"
               >
-                {TYPE_LABELS.map((t) => (
-                  <option key={t} value={t}>{t.charAt(0).toUpperCase() + t.slice(1)}</option>
+                {TYPE_LABELS.map((tp) => (
+                  <option key={tp} value={tp}>{t(`type.${tp}`)}</option>
                 ))}
               </select>
             </div>
             <div className="flex flex-col gap-1.5">
-              <Label>Priority</Label>
+              <Label>{t("issues.fieldPriority")}</Label>
               <select
                 value={priority}
                 onChange={(e) => setPriority(e.target.value)}
                 className="h-8 w-full rounded-lg border border-input bg-transparent px-2.5 text-sm outline-none focus:border-ring focus:ring-2 focus:ring-ring/50 capitalize"
               >
                 {PRIORITY_LABELS.map((p) => (
-                  <option key={p} value={p}>{p.charAt(0).toUpperCase() + p.slice(1)}</option>
+                  <option key={p} value={p}>{t(`priority.${p}`)}</option>
                 ))}
               </select>
             </div>
@@ -253,22 +255,22 @@ function IssueDrawer({
           {/* Meta info */}
           <div className="grid grid-cols-2 gap-2 text-xs text-gray-500 bg-gray-50 rounded-xl p-3">
             <div>
-              <span className="font-medium">Source:</span>{" "}
+              <span className="font-medium">{t("issues.metaSource")}:</span>{" "}
               <span className="capitalize">{issue.source}</span>
             </div>
             <div>
-              <span className="font-medium">Created:</span>{" "}
+              <span className="font-medium">{t("issues.metaCreated")}:</span>{" "}
               {formatDate(issue.createdAt)}
             </div>
             {issue.resolvedAt && (
               <div>
-                <span className="font-medium">Resolved:</span>{" "}
+                <span className="font-medium">{t("issues.metaResolved")}:</span>{" "}
                 {formatDate(issue.resolvedAt)}
               </div>
             )}
             {issue.dependsOn && issue.dependsOn.length > 0 && (
               <div>
-                <span className="font-medium">Depends on:</span>{" "}
+                <span className="font-medium">{t("issues.metaDependsOn")}:</span>{" "}
                 {issue.dependsOn.map((id) => `#${id}`).join(", ")}
               </div>
             )}
@@ -276,14 +278,14 @@ function IssueDrawer({
 
           {/* Comments section */}
           <div className="border-t pt-4">
-            <p className="text-sm font-semibold text-[#1a1a1a] mb-3">Comments</p>
+            <p className="text-sm font-semibold text-[#1a1a1a] mb-3">{t("issues.comments")}</p>
 
             {/* Comments list */}
             {commentsLoading ? (
-              <div className="text-center text-sm text-gray-400 py-4">Loading comments...</div>
+              <div className="text-center text-sm text-gray-400 py-4">{t("issues.loadingComments")}</div>
             ) : comments.length === 0 ? (
               <div className="text-center text-sm text-gray-400 py-4 bg-gray-50 rounded-xl">
-                No comments yet. Be the first to comment.
+                {t("issues.noComments")}
               </div>
             ) : (
               <div className="space-y-3">
@@ -323,7 +325,7 @@ function IssueDrawer({
                 onKeyDown={(e) => {
                   if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) sendComment();
                 }}
-                placeholder="Write a comment... (Cmd+Enter to send)"
+                placeholder={t("issues.commentPlaceholder")}
                 className="flex-1 text-sm border border-input rounded-xl p-2.5 resize-none outline-none focus:border-ring focus:ring-2 focus:ring-ring/50 min-h-[60px]"
                 rows={2}
                 disabled={commentSending}
@@ -334,7 +336,7 @@ function IssueDrawer({
                 className="self-end mb-0 px-3 py-2 bg-[#c6e135] rounded-xl text-sm font-medium text-[#1a1a1a] hover:brightness-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1.5"
               >
                 <LuSend className="w-3.5 h-3.5" />
-                {commentSending ? "Sending..." : "Send"}
+                {commentSending ? t("issues.sending") : t("issues.send")}
               </button>
             </div>
           </div>
@@ -355,7 +357,7 @@ function IssueDrawer({
             disabled={saving}
             className="bg-[#c6e135] text-[#1a1a1a] hover:brightness-95"
           >
-            {saving ? "Saving..." : "Save Changes"}
+            {saving ? t("issues.saving") : t("issues.saveChanges")}
           </Button>
         </div>
       </div>
@@ -364,6 +366,7 @@ function IssueDrawer({
 }
 
 export default function IssuesPage() {
+  const { t } = useI18n();
   const [issues, setIssues] = useState<KanbanIssue[]>([]);
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
@@ -482,13 +485,13 @@ export default function IssuesPage() {
     <div className="space-y-5">
       {/* Page header */}
       <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold text-[#1a1a1a]">Issues</h1>
+        <h1 className="text-3xl font-bold text-[#1a1a1a]">{t("issues.title")}</h1>
         <Button
           onClick={() => setCreateDialogOpen(true)}
           className="flex items-center gap-2 bg-[#c6e135] text-[#1a1a1a] rounded-full px-4 py-2 text-sm font-medium hover:brightness-95 transition-all"
         >
           <LuPlus className="w-4 h-4" />
-          New Issue
+          {t("issues.newIssue")}
         </Button>
       </div>
 
@@ -501,7 +504,7 @@ export default function IssuesPage() {
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search issues..."
+            placeholder={t("issues.search")}
             className="bg-transparent outline-none text-sm text-[#1a1a1a] placeholder:text-gray-400 w-full"
           />
         </div>
@@ -512,7 +515,7 @@ export default function IssuesPage() {
           onChange={(e) => setFilterProjectId(e.target.value)}
           className="bg-white rounded-full px-4 py-2 shadow-sm text-sm text-[#1a1a1a] outline-none cursor-pointer"
         >
-          <option value="all">All Projects</option>
+          <option value="all">{t("issues.allProjects")}</option>
           {projects.map((p) => (
             <option key={p.id} value={String(p.id)}>
               {p.name}
@@ -537,24 +540,24 @@ export default function IssuesPage() {
                   className={`w-2 h-2 rounded-full ${PRIORITY_DOT[p]}`}
                 />
               )}
-              {p === "all" ? "All Priority" : p.charAt(0).toUpperCase() + p.slice(1)}
+              {p === "all" ? t("issues.allPriorities") : t(`priority.${p}`)}
             </button>
           ))}
         </div>
 
         {/* Type pills */}
         <div className="flex items-center gap-1.5 flex-wrap">
-          {["all", ...TYPE_LABELS].map((t) => (
+          {["all", ...TYPE_LABELS].map((tp) => (
             <button
-              key={t}
-              onClick={() => setFilterType(t)}
+              key={tp}
+              onClick={() => setFilterType(tp)}
               className={`px-3 py-1.5 rounded-full text-xs font-medium transition-colors ${
-                filterType === t
+                filterType === tp
                   ? "bg-[#1a1a1a] text-white"
                   : "bg-white text-gray-600 shadow-sm hover:bg-gray-50"
               }`}
             >
-              {t === "all" ? "All Types" : t.charAt(0).toUpperCase() + t.slice(1)}
+              {tp === "all" ? t("issues.allTypes") : t(`type.${tp}`)}
             </button>
           ))}
         </div>
@@ -563,8 +566,8 @@ export default function IssuesPage() {
       {/* Count */}
       <div className="text-sm text-gray-500">
         {loading
-          ? "Loading..."
-          : `${filteredIssues.length} issue${filteredIssues.length !== 1 ? "s" : ""}`}
+          ? t("common.loading")
+          : `${filteredIssues.length} ${filteredIssues.length !== 1 ? t("issues.issuesPlural") : t("issues.issueSingular")}`}
       </div>
 
       {/* Kanban board */}

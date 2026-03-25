@@ -2,6 +2,7 @@
 
 import { useState, useMemo, useCallback } from "react";
 import Link from "next/link";
+import { useI18n } from "@/lib/i18n";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -91,6 +92,7 @@ interface NewProjectDialogProps {
 }
 
 function NewProjectDialog({ open, onClose, onCreated }: NewProjectDialogProps) {
+  const { t } = useI18n();
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const [stage, setStage] = useState<Stage>("idea");
@@ -111,7 +113,7 @@ function NewProjectDialog({ open, onClose, onCreated }: NewProjectDialogProps) {
       setDescription("");
       setStage("idea");
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to create project");
+      setError(err instanceof Error ? err.message : t("projects.errorCreate"));
     } finally {
       setSaving(false);
     }
@@ -121,11 +123,11 @@ function NewProjectDialog({ open, onClose, onCreated }: NewProjectDialogProps) {
     <Dialog open={open} onOpenChange={(v) => { if (!v) onClose(); }}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>New Project</DialogTitle>
+          <DialogTitle>{t("projects.newProject")}</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4 pt-2">
           <div className="space-y-1.5">
-            <label className="text-sm font-medium text-[#1a1a1a]">Name</label>
+            <label className="text-sm font-medium text-[#1a1a1a]">{t("projects.fieldName")}</label>
             <Input
               value={name}
               onChange={(e) => setName(e.target.value)}
@@ -137,7 +139,7 @@ function NewProjectDialog({ open, onClose, onCreated }: NewProjectDialogProps) {
             )}
           </div>
           <div className="space-y-1.5">
-            <label className="text-sm font-medium text-[#1a1a1a]">Description</label>
+            <label className="text-sm font-medium text-[#1a1a1a]">{t("projects.fieldDescription")}</label>
             <Input
               value={description}
               onChange={(e) => setDescription(e.target.value)}
@@ -145,7 +147,7 @@ function NewProjectDialog({ open, onClose, onCreated }: NewProjectDialogProps) {
             />
           </div>
           <div className="space-y-1.5">
-            <label className="text-sm font-medium text-[#1a1a1a]">Stage</label>
+            <label className="text-sm font-medium text-[#1a1a1a]">{t("projects.fieldStage")}</label>
             <Select value={stage} onValueChange={(v) => { if (v) setStage(v as Stage); }}>
               <SelectTrigger className="w-full">
                 <SelectValue />
@@ -153,7 +155,7 @@ function NewProjectDialog({ open, onClose, onCreated }: NewProjectDialogProps) {
               <SelectContent>
                 {STAGES.map((s) => (
                   <SelectItem key={s} value={s}>
-                    {s.charAt(0).toUpperCase() + s.slice(1)}
+                    {t(`stage.${s}`)}
                   </SelectItem>
                 ))}
               </SelectContent>
@@ -162,14 +164,14 @@ function NewProjectDialog({ open, onClose, onCreated }: NewProjectDialogProps) {
           {error && <p className="text-sm text-red-500">{error}</p>}
           <DialogFooter>
             <Button type="button" variant="outline" onClick={onClose}>
-              Cancel
+              {t("common.cancel")}
             </Button>
             <Button
               type="submit"
               disabled={!name.trim() || saving}
               className="bg-[#c6e135] text-[#1a1a1a] hover:bg-[#b5d12e] border-transparent"
             >
-              {saving ? "Creating..." : "Create"}
+              {saving ? t("projects.creating") : t("common.create")}
             </Button>
           </DialogFooter>
         </form>
@@ -354,22 +356,23 @@ function BatchActionsBar({
   onArchive,
   onClear,
 }: BatchActionsBarProps) {
+  const { t } = useI18n();
   return (
     <div className="flex items-center gap-3 px-4 py-2.5 bg-[#c6e135]/20 border border-[#c6e135] rounded-xl">
       <span className="text-sm font-medium text-[#1a1a1a]">
-        {count} selected
+        {count} {t("projects.selected")}
       </span>
       <div className="h-4 w-px bg-gray-300" />
       <div className="flex items-center gap-2">
-        <span className="text-xs text-gray-500">Stage:</span>
+        <span className="text-xs text-gray-500">{t("projects.fieldStage")}:</span>
         <Select onValueChange={(v) => { if (v) onChangeStage(v as Stage); }}>
           <SelectTrigger className="h-7 w-28 text-xs">
-            <SelectValue placeholder="Change..." />
+            <SelectValue placeholder={t("projects.change")} />
           </SelectTrigger>
           <SelectContent>
             {STAGES.map((s) => (
               <SelectItem key={s} value={s}>
-                {s.charAt(0).toUpperCase() + s.slice(1)}
+                {t(`stage.${s}`)}
               </SelectItem>
             ))}
           </SelectContent>
@@ -381,7 +384,7 @@ function BatchActionsBar({
         onClick={() => onSetPublic(true)}
         className="text-xs"
       >
-        Set Public
+        {t("projects.setPublic")}
       </Button>
       <Button
         size="xs"
@@ -389,7 +392,7 @@ function BatchActionsBar({
         onClick={() => onSetPublic(false)}
         className="text-xs"
       >
-        Set Private
+        {t("projects.setPrivate")}
       </Button>
       <Button
         size="xs"
@@ -397,14 +400,14 @@ function BatchActionsBar({
         onClick={onArchive}
         className="text-xs"
       >
-        Archive
+        {t("projects.archive")}
       </Button>
       <button
         type="button"
         onClick={onClear}
         className="ml-auto text-xs text-gray-500 hover:text-[#1a1a1a]"
       >
-        Clear
+        {t("projects.clearSelection")}
       </button>
     </div>
   );
@@ -416,6 +419,7 @@ interface ProjectTableProps {
 }
 
 export function ProjectTable({ initialProjects }: ProjectTableProps) {
+  const { t } = useI18n();
   const [projects, setProjects] = useState<ProjectRow[]>(initialProjects);
   const [search, setSearch] = useState("");
   const [stageFilter, setStageFilter] = useState<Stage | "all">("all");
@@ -575,15 +579,15 @@ export function ProjectTable({ initialProjects }: ProjectTableProps) {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-[#1a1a1a]">Projects</h1>
-          <p className="text-sm text-gray-500 mt-0.5">{projects.length} projects total</p>
+          <h1 className="text-3xl font-bold text-[#1a1a1a]">{t("projects.title")}</h1>
+          <p className="text-sm text-gray-500 mt-0.5">{projects.length} {t("projects.total")}</p>
         </div>
         <Button
           onClick={() => setShowNewDialog(true)}
           className="bg-[#c6e135] text-[#1a1a1a] hover:bg-[#b5d12e] border-transparent rounded-full gap-1.5"
         >
           <PlusIcon className="size-4" />
-          New Project
+          {t("projects.newProject")}
         </Button>
       </div>
 
@@ -592,7 +596,7 @@ export function ProjectTable({ initialProjects }: ProjectTableProps) {
         <div className="relative flex-1 min-w-[200px] max-w-xs">
           <SearchIcon className="absolute left-2.5 top-1/2 -translate-y-1/2 size-4 text-gray-400 pointer-events-none" />
           <Input
-            placeholder="Search projects..."
+            placeholder={t("projects.search")}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
             className="pl-8"
@@ -608,7 +612,7 @@ export function ProjectTable({ initialProjects }: ProjectTableProps) {
                 : "bg-white border border-gray-200 text-gray-600 hover:border-gray-400"
             }`}
           >
-            All
+            {t("projects.allStages")}
           </button>
           {STAGES.map((s) => (
             <button
@@ -621,7 +625,7 @@ export function ProjectTable({ initialProjects }: ProjectTableProps) {
                   : "bg-white border border-gray-200 text-gray-600 hover:border-gray-400"
               }`}
             >
-              {s.charAt(0).toUpperCase() + s.slice(1)}
+              {t(`stage.${s}`)}
             </button>
           ))}
         </div>
@@ -661,25 +665,25 @@ export function ProjectTable({ initialProjects }: ProjectTableProps) {
                   </button>
                 </th>
                 <th className="px-4 py-3 text-left">
-                  <SortHeader label="Name" sortKey="name" current={sortKey} dir={sortDir} onSort={handleSort} />
+                  <SortHeader label={t("projects.colName")} sortKey="name" current={sortKey} dir={sortDir} onSort={handleSort} />
                 </th>
                 <th className="px-4 py-3 text-left">
-                  <SortHeader label="Stage" sortKey="stage" current={sortKey} dir={sortDir} onSort={handleSort} />
+                  <SortHeader label={t("projects.colStage")} sortKey="stage" current={sortKey} dir={sortDir} onSort={handleSort} />
                 </th>
                 <th className="px-4 py-3 text-left">
-                  <SortHeader label="Progress" sortKey="progressPct" current={sortKey} dir={sortDir} onSort={handleSort} />
+                  <SortHeader label={t("projects.colProgress")} sortKey="progressPct" current={sortKey} dir={sortDir} onSort={handleSort} />
                 </th>
                 <th className="px-4 py-3 text-left">
-                  <SortHeader label="Issues" sortKey="openIssueCount" current={sortKey} dir={sortDir} onSort={handleSort} />
+                  <SortHeader label={t("projects.colIssues")} sortKey="openIssueCount" current={sortKey} dir={sortDir} onSort={handleSort} />
                 </th>
                 <th className="px-4 py-3 text-left">
-                  <span className="text-xs font-semibold uppercase tracking-wide text-gray-500">Public</span>
+                  <span className="text-xs font-semibold uppercase tracking-wide text-gray-500">{t("projects.colPublic")}</span>
                 </th>
                 <th className="px-4 py-3 text-left">
-                  <SortHeader label="Updated" sortKey="updatedAt" current={sortKey} dir={sortDir} onSort={handleSort} />
+                  <SortHeader label={t("projects.colUpdated")} sortKey="updatedAt" current={sortKey} dir={sortDir} onSort={handleSort} />
                 </th>
                 <th className="px-4 py-3 text-left">
-                  <span className="text-xs font-semibold uppercase tracking-wide text-gray-500">Actions</span>
+                  <span className="text-xs font-semibold uppercase tracking-wide text-gray-500">{t("projects.colActions")}</span>
                 </th>
               </tr>
             </thead>
@@ -687,7 +691,7 @@ export function ProjectTable({ initialProjects }: ProjectTableProps) {
               {visible.length === 0 ? (
                 <tr>
                   <td colSpan={8} className="px-4 py-12 text-center text-gray-400">
-                    No projects found
+                    {t("projects.noProjects")}
                   </td>
                 </tr>
               ) : (
@@ -797,7 +801,7 @@ export function ProjectTable({ initialProjects }: ProjectTableProps) {
         </div>
         {visible.length > 0 && (
           <div className="px-4 py-3 border-t border-gray-50 text-xs text-gray-400">
-            Showing {visible.length} of {projects.length} projects
+            {t("projects.showing")} {visible.length} / {projects.length}
           </div>
         )}
       </div>

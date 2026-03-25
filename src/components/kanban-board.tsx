@@ -1,5 +1,6 @@
 "use client";
 
+import { useI18n } from "@/lib/i18n";
 import {
   DndContext,
   closestCenter,
@@ -29,25 +30,25 @@ interface Column {
 const COLUMNS: Column[] = [
   {
     id: "open",
-    label: "Open",
+    label: "issues.open",
     statuses: ["open"],
     accentClass: "border-gray-300 text-gray-600",
   },
   {
     id: "in-progress",
-    label: "In Progress",
+    label: "issues.inProgress",
     statuses: ["in-progress"],
     accentClass: "border-[#c6e135] text-[#1a1a1a]",
   },
   {
     id: "done",
-    label: "Done",
+    label: "issues.done",
     statuses: ["resolved"],
     accentClass: "border-emerald-400 text-emerald-700",
   },
   {
     id: "closed",
-    label: "Closed",
+    label: "issues.closed",
     statuses: ["closed", "wont-fix", "deferred"],
     accentClass: "border-gray-400 text-gray-500",
   },
@@ -70,6 +71,7 @@ function DroppableColumn({
   issues: KanbanIssue[];
   onCardClick: (issue: KanbanIssue) => void;
 }) {
+  const { t } = useI18n();
   const { setNodeRef, isOver } = useDroppable({ id: column.id });
 
   return (
@@ -89,7 +91,7 @@ function DroppableColumn({
       </SortableContext>
       {issues.length === 0 && (
         <div className="flex-1 flex items-center justify-center">
-          <p className="text-xs text-gray-400">Drop issues here</p>
+          <p className="text-xs text-gray-400">{t("issues.dropHere")}</p>
         </div>
       )}
     </div>
@@ -107,6 +109,7 @@ export function KanbanBoard({
   onCardClick,
   onStatusChange,
 }: KanbanBoardProps) {
+  const { t } = useI18n();
   const [activeIssue, setActiveIssue] = useState<KanbanIssue | null>(null);
 
   const sensors = useSensors(
@@ -190,7 +193,7 @@ export function KanbanBoard({
                 <span
                   className={`text-sm font-semibold border-b-2 pb-0.5 ${column.accentClass}`}
                 >
-                  {column.label}
+                  {t(column.label)}
                 </span>
               </div>
               <span className="text-xs text-gray-400 bg-white rounded-full px-2 py-0.5 shadow-sm">

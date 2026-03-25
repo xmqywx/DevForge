@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useI18n } from "@/lib/i18n";
 import {
   Dialog,
   DialogContent,
@@ -41,6 +42,7 @@ export function IssueCreateDialog({
   defaultProjectId,
   onCreated,
 }: IssueCreateDialogProps) {
+  const { t } = useI18n();
   const [projectId, setProjectId] = useState<string>(
     defaultProjectId ? String(defaultProjectId) : ""
   );
@@ -55,7 +57,7 @@ export function IssueCreateDialog({
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!projectId || !title.trim()) {
-      setError("Project and title are required.");
+      setError(t("issues.errorRequired"));
       return;
     }
     setError("");
@@ -93,7 +95,7 @@ export function IssueCreateDialog({
       setDependsOn("");
       onOpenChange(false);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to create issue");
+      setError(err instanceof Error ? err.message : t("issues.errorCreate"));
     } finally {
       setSubmitting(false);
     }
@@ -103,15 +105,15 @@ export function IssueCreateDialog({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-lg">
         <DialogHeader>
-          <DialogTitle>New Issue</DialogTitle>
+          <DialogTitle>{t("issues.newIssue")}</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="flex flex-col gap-4 mt-1">
           {/* Project */}
           <div className="flex flex-col gap-1.5">
-            <Label htmlFor="issue-project">Project *</Label>
+            <Label htmlFor="issue-project">{t("issues.fieldProject")} *</Label>
             <Select value={projectId} onValueChange={(v) => v && setProjectId(v)}>
               <SelectTrigger className="w-full">
-                <SelectValue placeholder="Select project..." />
+                <SelectValue placeholder={t("issues.selectProject")} />
               </SelectTrigger>
               <SelectContent>
                 {projects.map((p) => (
@@ -125,24 +127,24 @@ export function IssueCreateDialog({
 
           {/* Title */}
           <div className="flex flex-col gap-1.5">
-            <Label htmlFor="issue-title">Title *</Label>
+            <Label htmlFor="issue-title">{t("issues.fieldTitle")} *</Label>
             <Input
               id="issue-title"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              placeholder="Brief description of the issue"
+              placeholder={t("issues.titlePlaceholder")}
               required
             />
           </div>
 
           {/* Description */}
           <div className="flex flex-col gap-1.5">
-            <Label htmlFor="issue-desc">Description</Label>
+            <Label htmlFor="issue-desc">{t("issues.fieldDescription")}</Label>
             <Textarea
               id="issue-desc"
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              placeholder="More details..."
+              placeholder={t("issues.addDetails")}
               rows={4}
             />
           </div>
@@ -150,16 +152,16 @@ export function IssueCreateDialog({
           {/* Type + Priority row */}
           <div className="grid grid-cols-2 gap-3">
             <div className="flex flex-col gap-1.5">
-              <Label>Type</Label>
+              <Label>{t("issues.fieldType")}</Label>
               <Select value={type} onValueChange={(v) => v && setType(v)}>
                 <SelectTrigger className="w-full">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
                   {["bug", "feature", "improvement", "question", "task", "note"].map(
-                    (t) => (
-                      <SelectItem key={t} value={t}>
-                        {t.charAt(0).toUpperCase() + t.slice(1)}
+                    (tp) => (
+                      <SelectItem key={tp} value={tp}>
+                        {t(`type.${tp}`)}
                       </SelectItem>
                     )
                   )}
@@ -167,7 +169,7 @@ export function IssueCreateDialog({
               </Select>
             </div>
             <div className="flex flex-col gap-1.5">
-              <Label>Priority</Label>
+              <Label>{t("issues.fieldPriority")}</Label>
               <Select value={priority} onValueChange={(v) => v && setPriority(v)}>
                 <SelectTrigger className="w-full">
                   <SelectValue />
@@ -175,7 +177,7 @@ export function IssueCreateDialog({
                 <SelectContent>
                   {["high", "medium", "low"].map((p) => (
                     <SelectItem key={p} value={p}>
-                      {p.charAt(0).toUpperCase() + p.slice(1)}
+                      {t(`priority.${p}`)}
                     </SelectItem>
                   ))}
                 </SelectContent>
@@ -185,7 +187,7 @@ export function IssueCreateDialog({
 
           {/* Depends On */}
           <div className="flex flex-col gap-1.5">
-            <Label htmlFor="issue-depends">Depends On (issue IDs, comma-separated)</Label>
+            <Label htmlFor="issue-depends">{t("issues.fieldDependsOn")}</Label>
             <Input
               id="issue-depends"
               value={dependsOn}
@@ -202,14 +204,14 @@ export function IssueCreateDialog({
               variant="outline"
               onClick={() => onOpenChange(false)}
             >
-              Cancel
+              {t("common.cancel")}
             </Button>
             <Button
               type="submit"
               disabled={submitting}
               className="bg-[#c6e135] text-[#1a1a1a] hover:brightness-95"
             >
-              {submitting ? "Creating..." : "Create Issue"}
+              {submitting ? t("issues.creating") : t("issues.createIssue")}
             </Button>
           </DialogFooter>
         </form>

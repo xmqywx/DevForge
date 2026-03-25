@@ -3,6 +3,7 @@
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { LuGripVertical } from "react-icons/lu";
+import { useI18n } from "@/lib/i18n";
 
 export interface KanbanIssue {
   id: number;
@@ -43,6 +44,7 @@ interface KanbanCardProps {
 }
 
 export function KanbanCard({ issue, onClick }: KanbanCardProps) {
+  const { t } = useI18n();
   const {
     attributes,
     listeners,
@@ -81,12 +83,12 @@ export function KanbanCard({ issue, onClick }: KanbanCardProps) {
           <div className="flex items-center gap-1.5 mt-2 flex-wrap">
             <span
               className={`w-2 h-2 rounded-full shrink-0 ${PRIORITY_DOT[issue.priority] ?? PRIORITY_DOT.medium}`}
-              title={`Priority: ${issue.priority}`}
+              title={`${t("issues.fieldPriority")}: ${t(`priority.${issue.priority}`)}`}
             />
             <span
               className={`px-1.5 py-0.5 rounded-full text-xs font-medium capitalize ${TYPE_BADGE[issue.type] ?? TYPE_BADGE.task}`}
             >
-              {issue.type}
+              {t(`type.${issue.type}`)}
             </span>
             {issue.projectName && (
               <span className="text-xs text-gray-400 truncate">
