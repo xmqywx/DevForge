@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import { useTheme } from "@/lib/theme";
 import {
   LuScan,
   LuLoader,
@@ -385,56 +386,214 @@ function AutomationTab() {
 
 // ── Tab 4: Notifications ──────────────────────────────────────────────────────
 
+const NOTIFICATION_TRIGGERS = [
+  "New feedback received",
+  "Issue status changed",
+  "Sync completed",
+  "Scan completed",
+  "New comment on issue",
+];
+
 function NotificationsTab() {
+  const [smtpHost, setSmtpHost] = useState("");
+  const [smtpPort, setSmtpPort] = useState("587");
+  const [smtpUser, setSmtpUser] = useState("");
+  const [smtpPassword, setSmtpPassword] = useState("");
+  const [fromAddress, setFromAddress] = useState("");
+  const [notificationEmail, setNotificationEmail] = useState("");
+  const [triggers, setTriggers] = useState<Record<string, boolean>>(
+    Object.fromEntries(NOTIFICATION_TRIGGERS.map((t) => [t, false]))
+  );
+  const [saving, setSaving] = useState(false);
+  const [saveMsg, setSaveMsg] = useState<{ ok: boolean; msg: string } | null>(null);
+  const [testing, setTesting] = useState(false);
+  const [testMsg, setTestMsg] = useState<{ ok: boolean; msg: string } | null>(null);
+
+  useEffect(() => {
+    fetch("/api/settings")
+      .then((r) => r.json() as Promise<Record<string, unknown>>)
+      .then((data) => {
+        if (typeof data.smtp_host === "string") setSmtpHost(data.smtp_host);
+        if (typeof data.smtp_port === "string") setSmtpPort(data.smtp_port);
+        if (typeof data.smtp_user === "string") setSmtpUser(data.smtp_user);
+        if (typeof data.smtp_password === "string") setSmtpPassword(data.smtp_password);
+        if (typeof data.smtp_from === "string") setFromAddress(data.smtp_from);
+        if (typeof data.notification_email === "string") setNotificationEmail(data.notification_email);
+        if (data.notification_triggers && typeof data.notification_triggers === "object") {
+          setTriggers(data.notification_triggers as Record<string, boolean>);
+        }
+      })
+      .catch(() => {});
+  }, []);
+
+  async function saveSettings() {
+    setSaving(true);
+    setSaveMsg(null);
+    try {
+      const fields: Array<{ key: string; value: unknown }> = [
+        { key: "smtp_host", value: smtpHost },
+        { key: "smtp_port", value: smtpPort },
+        { key: "smtp_user", value: smtpUser },
+        { key: "smtp_password", value: smtpPassword },
+        { key: "smtp_from", value: fromAddress },
+        { key: "notification_email", value: notificationEmail },
+        { key: "notification_triggers", value: triggers },
+      ];
+      await Promise.all(
+        fields.map((f) =>
+          fetch("/api/settings", {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(f),
+          })
+        )
+      );
+      setSaveMsg({ ok: true, msg: "Settings saved" });
+    } catch {
+      setSaveMsg({ ok: false, msg: "Failed to save" });
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  async function sendTestEmail() {
+    setTesting(true);
+    setTestMsg(null);
+    try {
+      const res = await fetch("/api/settings/test-email", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          host: smtpHost,
+          port: smtpPort,
+          user: smtpUser,
+          password: smtpPassword,
+          from: fromAddress,
+          to: notificationEmail,
+        }),
+      });
+      const data = await res.json() as { success: boolean; message?: string; error?: string };
+      if (data.success) {
+        setTestMsg({ ok: true, msg: data.message ?? "Test passed" });
+      } else {
+        setTestMsg({ ok: false, msg: data.error ?? "Test failed" });
+      }
+    } catch {
+      setTestMsg({ ok: false, msg: "Request failed" });
+    } finally {
+      setTesting(false);
+    }
+  }
+
+  function toggleTrigger(trigger: string) {
+    setTriggers((prev) => ({ ...prev, [trigger]: !prev[trigger] }));
+  }
+
   return (
     <div className="space-y-6">
       <SectionTitle>Notification Settings</SectionTitle>
-      <InfoNote>
-        Email notifications are not yet functional. Configure SMTP below for future use.
-      </InfoNote>
+      <InfoNote>Configure SMTP to receive email notifications.</InfoNote>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {[
-          { label: "SMTP Host", placeholder: "smtp.example.com" },
-          { label: "SMTP Port", placeholder: "587" },
-          { label: "SMTP User", placeholder: "user@example.com" },
-          { label: "SMTP Password", placeholder: "••••••••", type: "password" },
-          { label: "From Address", placeholder: "devforge@example.com" },
-          { label: "Notification Email", placeholder: "you@example.com" },
-        ].map(({ label, placeholder, type }) => (
-          <div key={label} className="space-y-1">
-            <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">{label}</label>
-            <input
-              type={type ?? "text"}
-              placeholder={placeholder}
-              disabled
-              className="w-full bg-gray-50 border border-gray-200 rounded-xl px-3 py-2 text-sm text-gray-700 placeholder-gray-400 disabled:opacity-60"
-            />
-          </div>
-        ))}
+        <div className="space-y-1">
+          <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">SMTP Host</label>
+          <input
+            type="text"
+            value={smtpHost}
+            onChange={(e) => setSmtpHost(e.target.value)}
+            placeholder="smtp.example.com"
+            className="w-full bg-gray-50 border border-gray-200 rounded-xl px-3 py-2 text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#c6e135]/50"
+          />
+        </div>
+        <div className="space-y-1">
+          <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">SMTP Port</label>
+          <input
+            type="text"
+            value={smtpPort}
+            onChange={(e) => setSmtpPort(e.target.value)}
+            placeholder="587"
+            className="w-full bg-gray-50 border border-gray-200 rounded-xl px-3 py-2 text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#c6e135]/50"
+          />
+        </div>
+        <div className="space-y-1">
+          <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">SMTP User</label>
+          <input
+            type="text"
+            value={smtpUser}
+            onChange={(e) => setSmtpUser(e.target.value)}
+            placeholder="user@example.com"
+            className="w-full bg-gray-50 border border-gray-200 rounded-xl px-3 py-2 text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#c6e135]/50"
+          />
+        </div>
+        <div className="space-y-1">
+          <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">SMTP Password</label>
+          <input
+            type="password"
+            value={smtpPassword}
+            onChange={(e) => setSmtpPassword(e.target.value)}
+            placeholder="••••••••"
+            className="w-full bg-gray-50 border border-gray-200 rounded-xl px-3 py-2 text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#c6e135]/50"
+          />
+        </div>
+        <div className="space-y-1">
+          <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">From Address</label>
+          <input
+            type="text"
+            value={fromAddress}
+            onChange={(e) => setFromAddress(e.target.value)}
+            placeholder="devforge@example.com"
+            className="w-full bg-gray-50 border border-gray-200 rounded-xl px-3 py-2 text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#c6e135]/50"
+          />
+        </div>
+        <div className="space-y-1">
+          <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">Notification Email</label>
+          <input
+            type="text"
+            value={notificationEmail}
+            onChange={(e) => setNotificationEmail(e.target.value)}
+            placeholder="you@example.com"
+            className="w-full bg-gray-50 border border-gray-200 rounded-xl px-3 py-2 text-sm text-gray-700 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#c6e135]/50"
+          />
+        </div>
       </div>
 
       <div>
         <h4 className="text-sm font-semibold text-gray-700 mb-3">Notification Triggers</h4>
         <div className="space-y-2">
-          {[
-            "New feedback received",
-            "Issue status changed",
-            "Sync completed",
-            "Scan completed",
-            "New comment on issue",
-          ].map((trigger) => (
-            <label key={trigger} className="flex items-center gap-3 cursor-not-allowed opacity-60">
-              <input type="checkbox" disabled className="rounded" />
+          {NOTIFICATION_TRIGGERS.map((trigger) => (
+            <label key={trigger} className="flex items-center gap-3 cursor-pointer">
+              <input
+                type="checkbox"
+                checked={!!triggers[trigger]}
+                onChange={() => toggleTrigger(trigger)}
+                className="rounded"
+              />
               <span className="text-sm text-gray-700">{trigger}</span>
             </label>
           ))}
         </div>
       </div>
 
-      <AccentButton icon={LuBell} disabled>
-        Send Test Email
-      </AccentButton>
+      <div className="flex items-center gap-4 flex-wrap">
+        <AccentButton onClick={saveSettings} loading={saving} icon={LuSettings}>
+          {saving ? "Saving..." : "Save SMTP Settings"}
+        </AccentButton>
+        <AccentButton onClick={sendTestEmail} loading={testing} icon={LuBell}>
+          {testing ? "Sending..." : "Send Test Email"}
+        </AccentButton>
+        {saveMsg && (
+          <span className={`flex items-center gap-1.5 text-sm ${saveMsg.ok ? "text-green-600" : "text-red-500"}`}>
+            {saveMsg.ok ? <LuCircleCheck className="w-4 h-4" /> : <LuCircleX className="w-4 h-4" />}
+            {saveMsg.msg}
+          </span>
+        )}
+        {testMsg && (
+          <span className={`flex items-center gap-1.5 text-sm ${testMsg.ok ? "text-green-600" : "text-red-500"}`}>
+            {testMsg.ok ? <LuCircleCheck className="w-4 h-4" /> : <LuCircleX className="w-4 h-4" />}
+            {testMsg.msg}
+          </span>
+        )}
+      </div>
     </div>
   );
 }
@@ -573,6 +732,8 @@ function DatabaseTab() {
   const [stats, setStats] = useState<DbStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [importing, setImporting] = useState(false);
+  const [importMsg, setImportMsg] = useState<{ ok: boolean; msg: string } | null>(null);
 
   const loadStats = useCallback(async () => {
     setLoading(true);
@@ -595,6 +756,50 @@ function DatabaseTab() {
   async function handleExport() {
     window.open("/api/settings/db-export", "_blank");
   }
+
+  function handleImportClick() {
+    const input = document.getElementById("db-import-input") as HTMLInputElement | null;
+    input?.click();
+  }
+
+  async function handleFileSelected(e: React.ChangeEvent<HTMLInputElement>) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    const confirmed = window.confirm(
+      "Warning: This will replace your current database with the imported file. A backup will be created automatically.\n\nContinue?"
+    );
+    if (!confirmed) {
+      e.target.value = "";
+      return;
+    }
+
+    setImporting(true);
+    setImportMsg(null);
+    try {
+      const formData = new FormData();
+      formData.append("file", file);
+      const res = await fetch("/api/settings/db-import", {
+        method: "POST",
+        body: formData,
+      });
+      const data = await res.json() as { success?: boolean; backup?: string; error?: string };
+      if (data.success) {
+        setImportMsg({ ok: true, msg: `Imported successfully. Backup: ${data.backup ?? "saved"}` });
+        void loadStats();
+      } else {
+        setImportMsg({ ok: false, msg: data.error ?? "Import failed" });
+      }
+    } catch {
+      setImportMsg({ ok: false, msg: "Import request failed" });
+    } finally {
+      setImporting(false);
+      e.target.value = "";
+    }
+  }
+
+  // suppress unused variable warning
+  void fileInputRef;
 
   return (
     <div className="space-y-6">
@@ -633,16 +838,26 @@ function DatabaseTab() {
         </>
       )}
 
-      <div className="flex items-center gap-3">
+      {/* Hidden file input for DB import */}
+      <input
+        id="db-import-input"
+        type="file"
+        accept=".db"
+        className="hidden"
+        onChange={handleFileSelected}
+      />
+
+      <div className="flex items-center gap-3 flex-wrap">
         <AccentButton onClick={handleExport} icon={LuDownload}>
           Export DB
         </AccentButton>
         <button
-          disabled
-          className="flex items-center gap-2 bg-white border border-gray-200 text-gray-600 rounded-full px-5 py-2.5 text-sm font-medium opacity-50 cursor-not-allowed"
+          onClick={handleImportClick}
+          disabled={importing}
+          className="flex items-center gap-2 bg-white border border-gray-200 text-gray-600 rounded-full px-5 py-2.5 text-sm font-medium hover:border-gray-300 hover:text-gray-800 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
         >
-          <LuUpload className="w-4 h-4" />
-          Import DB
+          {importing ? <LuLoader className="w-4 h-4 animate-spin" /> : <LuUpload className="w-4 h-4" />}
+          {importing ? "Importing..." : "Import DB"}
         </button>
         <button
           onClick={loadStats}
@@ -652,6 +867,13 @@ function DatabaseTab() {
           Refresh
         </button>
       </div>
+
+      {importMsg && (
+        <div className={`flex items-center gap-1.5 text-sm ${importMsg.ok ? "text-green-600" : "text-red-500"}`}>
+          {importMsg.ok ? <LuCircleCheck className="w-4 h-4" /> : <LuCircleX className="w-4 h-4" />}
+          {importMsg.msg}
+        </div>
+      )}
     </div>
   );
 }
@@ -661,44 +883,33 @@ function DatabaseTab() {
 type ThemeMode = "light" | "dark" | "system";
 
 function ThemeTab() {
-  const [theme, setTheme] = useState<ThemeMode>("system");
+  const { theme, setTheme } = useTheme();
 
-  useEffect(() => {
-    const saved = localStorage.getItem("devforge-theme") as ThemeMode | null;
-    if (saved) setTheme(saved);
-  }, []);
-
-  function selectTheme(t: ThemeMode) {
-    setTheme(t);
-    localStorage.setItem("devforge-theme", t);
-  }
-
-  const options: { value: ThemeMode; label: string; desc: string }[] = [
-    { value: "light", label: "Light", desc: "Always use light mode" },
-    { value: "dark", label: "Dark", desc: "Always use dark mode" },
-    { value: "system", label: "System", desc: "Follow your OS preference" },
+  const options: { value: ThemeMode; label: string; desc: string; preview: string }[] = [
+    { value: "light", label: "Light", desc: "Always use light mode", preview: "bg-[#f0f0e8]" },
+    { value: "dark", label: "Dark", desc: "Always use dark mode", preview: "bg-[#0f0f0f]" },
+    { value: "system", label: "System", desc: "Follow your OS preference", preview: "bg-gradient-to-r from-[#f0f0e8] to-[#0f0f0f]" },
   ];
 
   return (
     <div className="space-y-6">
       <SectionTitle>Theme</SectionTitle>
-      <InfoNote>
-        Theme switching is saved to localStorage. Full dark mode support is planned for a future update.
-      </InfoNote>
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        {options.map(({ value, label, desc }) => (
+        {options.map(({ value, label, desc, preview }) => (
           <button
             key={value}
-            onClick={() => selectTheme(value)}
-            className={`flex flex-col items-start gap-1 p-4 rounded-2xl border-2 transition-all text-left ${
+            onClick={() => setTheme(value)}
+            className={`flex flex-col items-start gap-2 p-4 rounded-2xl border-2 transition-all text-left ${
               theme === value
                 ? "border-[#c6e135] bg-[#c6e135]/10"
-                : "border-gray-200 bg-white hover:border-gray-300"
+                : "border-gray-200 hover:border-gray-300"
             }`}
+            style={theme !== value ? { borderColor: "var(--border)", backgroundColor: "var(--bg-card)" } : undefined}
           >
-            <span className="font-semibold text-[#1a1a1a]">{label}</span>
-            <span className="text-xs text-gray-500">{desc}</span>
+            <div className={`w-full h-8 rounded-lg ${preview} border border-gray-200/30`} />
+            <span className="font-semibold" style={{ color: "var(--text-primary)" }}>{label}</span>
+            <span className="text-xs" style={{ color: "var(--text-secondary)" }}>{desc}</span>
             {theme === value && (
               <LuCircleCheck className="w-4 h-4 text-[#8aad00] mt-1" />
             )}
@@ -735,7 +946,7 @@ function LanguageTab() {
     <div className="space-y-6">
       <SectionTitle>Language / 语言</SectionTitle>
       <InfoNote>
-        Full i18n support is planned for a future update. Language preference is saved to localStorage.
+        Language preference is saved to localStorage.
       </InfoNote>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-md">

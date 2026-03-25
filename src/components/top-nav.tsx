@@ -24,18 +24,18 @@ export function TopNav() {
   const { t } = useI18n();
 
   return (
-    <nav className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-gray-200/60">
+    <nav className="sticky top-0 z-50 backdrop-blur-md border-b" style={{ backgroundColor: "color-mix(in srgb, var(--bg-card) 80%, transparent)", borderColor: "var(--border)" }}>
       <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
         {/* Logo */}
         <Link href="/" className="flex items-center gap-2">
-          <div className="w-9 h-9 bg-[#1a1a1a] rounded-xl flex items-center justify-center">
-            <LuCode className="w-5 h-5 text-[#c6e135]" />
+          <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ backgroundColor: "var(--text-primary)" }}>
+            <LuCode className="w-5 h-5" style={{ color: "var(--accent)" }} />
           </div>
-          <span className="font-bold text-lg text-[#1a1a1a]">DevForge</span>
+          <span className="font-bold text-lg" style={{ color: "var(--text-primary)" }}>DevForge</span>
         </Link>
 
         {/* Center tabs */}
-        <div className="flex items-center gap-1 bg-gray-100 rounded-full p-1">
+        <div className="flex items-center gap-1 rounded-full p-1" style={{ backgroundColor: "color-mix(in srgb, var(--text-primary) 8%, transparent)" }}>
           {NAV_ITEMS.map((item) => {
             const isActive =
               pathname === item.href ||
@@ -48,8 +48,9 @@ export function TopNav() {
                   "px-3 py-1.5 rounded-full text-xs font-medium transition-colors whitespace-nowrap",
                   isActive
                     ? "bg-[#c6e135] text-[#1a1a1a]"
-                    : "text-gray-500 hover:text-gray-700"
+                    : "hover:opacity-80"
                 )}
+                style={!isActive ? { color: "var(--text-secondary)" } : undefined}
               >
                 {t(item.key)}
               </Link>
@@ -60,8 +61,8 @@ export function TopNav() {
         {/* Right: language switcher + bell + avatar */}
         <div className="flex items-center gap-3">
           <LanguageSwitcher />
-          <button className="w-9 h-9 rounded-full flex items-center justify-center hover:bg-gray-100 transition-colors">
-            <LuBell className="w-5 h-5 text-gray-500" />
+          <button className="w-9 h-9 rounded-full flex items-center justify-center transition-colors hover:opacity-80" style={{ color: "var(--text-secondary)" }}>
+            <LuBell className="w-5 h-5" />
           </button>
           <div className="w-9 h-9 rounded-full bg-gradient-to-br from-[#c6e135] to-emerald-400 flex items-center justify-center text-sm font-bold text-[#1a1a1a]">
             Y
