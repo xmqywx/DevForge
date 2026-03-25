@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
-import { LuSearch, LuPlus, LuX, LuChevronRight } from "react-icons/lu";
+import { useEffect, useState, useCallback, useRef } from "react";
+import { LuSearch, LuPlus, LuX, LuChevronRight, LuSend } from "react-icons/lu";
 import { KanbanBoard } from "@/components/kanban-board";
 import { KanbanIssue } from "@/components/kanban-card";
 import { IssueCreateDialog } from "@/components/issue-create-dialog";
@@ -10,6 +10,41 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 // Native select used in drawer to avoid portal/overflow z-index issues
+
+const SERVER_URL =
+  typeof window !== "undefined"
+    ? (process.env.NEXT_PUBLIC_DEVFORGE_SERVER_URL ?? "https://forge.wdao.chat")
+    : "https://forge.wdao.chat";
+
+interface IssueComment {
+  id: number | string;
+  issueId: number;
+  authorName: string;
+  isOwner: boolean;
+  content: string;
+  createdAt: string;
+  fromServer?: boolean;
+}
+
+function relativeTime(dateStr: string): string {
+  const diff = Date.now() - new Date(dateStr).getTime();
+  const mins = Math.floor(diff / 60000);
+  if (mins < 1) return "just now";
+  if (mins < 60) return `${mins}m ago`;
+  const hrs = Math.floor(mins / 60);
+  if (hrs < 24) return `${hrs}h ago`;
+  const days = Math.floor(hrs / 24);
+  if (days < 30) return `${days}d ago`;
+  return new Date(dateStr).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+}
+
+function fixImageUrls(html: string): string {
+  // Prefix relative image src paths with the server URL
+  return html.replace(
+    /(<img[^>]+src=["'])(?!https?:\/\/)([^"']+)(["'])/gi,
+    (_, pre, path, quote) => `${pre}${SERVER_URL}${path.startsWith("/") ? "" : "/"}${path}${quote}`
+  );
+}
 
 interface Project {
   id: number;
@@ -54,6 +89,11 @@ function IssueDrawer({
   const [status, setStatus] = useState(issue.status);
   const [saving, setSaving] = useState(false);
   const [saveMsg, setSaveMsg] = useState("");
+  const [comments, setComments] = useState<IssueComment[]>([]);
+  const [commentText, setCommentText] = useState("");
+  const [commentSending, setCommentSending] = useState(false);
+  const [commentsLoading, setCommentsLoading] = useState(false);
+  const commentsEndRef = useRef<HTMLDivElement>(null);
 
   // Reset when issue changes
   useEffect(() => {
@@ -64,6 +104,39 @@ function IssueDrawer({
     setStatus(issue.status);
     setSaveMsg("");
   }, [issue.id]);
+
+  // Load comments when issue changes
+  useEffect(() => {
+    setComments([]);
+    setCommentText("");
+    setCommentsLoading(true);
+    fetch(`/api/issues/${issue.id}/comments`)
+      .then((r) => r.json())
+      .then((data) => setComments(Array.isArray(data) ? data : []))
+      .catch(() => setComments([]))
+      .finally(() => setCommentsLoading(false));
+  }, [issue.id]);
+
+  async function sendComment() {
+    if (!commentText.trim()) return;
+    setCommentSending(true);
+    try {
+      await fetch(`/api/issues/${issue.id}/comments`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ content: commentText }),
+      });
+      setCommentText("");
+      const res = await fetch(`/api/issues/${issue.id}/comments`);
+      const data = await res.json();
+      setComments(Array.isArray(data) ? data : []);
+      setTimeout(() => commentsEndRef.current?.scrollIntoView({ behavior: "smooth" }), 100);
+    } catch {
+      // silent
+    } finally {
+      setCommentSending(false);
+    }
+  }
 
   async function handleSave() {
     setSaving(true);
@@ -201,11 +274,68 @@ function IssueDrawer({
             )}
           </div>
 
-          {/* Comments placeholder */}
+          {/* Comments section */}
           <div className="border-t pt-4">
             <p className="text-sm font-semibold text-[#1a1a1a] mb-3">Comments</p>
-            <div className="bg-gray-50 rounded-xl p-4 text-center text-sm text-gray-400">
-              Comments will be loaded from the server in Task 5.
+
+            {/* Comments list */}
+            {commentsLoading ? (
+              <div className="text-center text-sm text-gray-400 py-4">Loading comments...</div>
+            ) : comments.length === 0 ? (
+              <div className="text-center text-sm text-gray-400 py-4 bg-gray-50 rounded-xl">
+                No comments yet. Be the first to comment.
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {comments.map((c) => (
+                  <div key={String(c.id)} className="flex gap-3">
+                    <img
+                      src={`https://api.dicebear.com/7.x/initials/svg?seed=${encodeURIComponent(c.authorName)}`}
+                      alt={c.authorName}
+                      className="w-8 h-8 rounded-full shrink-0 bg-gray-100"
+                    />
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className="text-sm font-medium text-[#1a1a1a]">{c.authorName}</span>
+                        {c.isOwner && (
+                          <span className="text-xs bg-[#c6e135] text-[#1a1a1a] px-1.5 py-0.5 rounded font-medium">
+                            Owner
+                          </span>
+                        )}
+                        <span className="text-xs text-gray-400">{relativeTime(c.createdAt)}</span>
+                      </div>
+                      <div
+                        className="text-sm text-gray-600 mt-1 prose prose-sm max-w-none break-words"
+                        dangerouslySetInnerHTML={{ __html: fixImageUrls(c.content) }}
+                      />
+                    </div>
+                  </div>
+                ))}
+                <div ref={commentsEndRef} />
+              </div>
+            )}
+
+            {/* Reply input */}
+            <div className="mt-4 flex gap-2 items-end">
+              <textarea
+                value={commentText}
+                onChange={(e) => setCommentText(e.target.value)}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) sendComment();
+                }}
+                placeholder="Write a comment... (Cmd+Enter to send)"
+                className="flex-1 text-sm border border-input rounded-xl p-2.5 resize-none outline-none focus:border-ring focus:ring-2 focus:ring-ring/50 min-h-[60px]"
+                rows={2}
+                disabled={commentSending}
+              />
+              <button
+                onClick={sendComment}
+                disabled={commentSending || !commentText.trim()}
+                className="self-end mb-0 px-3 py-2 bg-[#c6e135] rounded-xl text-sm font-medium text-[#1a1a1a] hover:brightness-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1.5"
+              >
+                <LuSend className="w-3.5 h-3.5" />
+                {commentSending ? "Sending..." : "Send"}
+              </button>
             </div>
           </div>
         </div>
