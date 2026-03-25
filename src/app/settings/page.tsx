@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { useTheme } from "@/lib/theme";
+import { useI18n } from "@/lib/i18n";
 import {
   LuScan,
   LuLoader,
@@ -115,6 +116,7 @@ function AccentButton({
 // ── Tab 1: Scan ────────────────────────────────────────────────────────────────
 
 function ScanTab() {
+  const { t } = useI18n();
   const [scanning, setScanning] = useState(false);
   const [result, setResult] = useState<string | null>(null);
 
@@ -149,7 +151,7 @@ function ScanTab() {
 
       <div className="flex items-center gap-4 pt-2">
         <AccentButton onClick={runScan} loading={scanning} icon={LuScan}>
-          {scanning ? "Scanning..." : "Scan Now"}
+          {scanning ? "Scanning..." : t("settings.scanNow")}
         </AccentButton>
         {result && (
           <span className="text-sm text-gray-500">{result}</span>
@@ -162,6 +164,7 @@ function ScanTab() {
 // ── Tab 2: Sync ────────────────────────────────────────────────────────────────
 
 function SyncTab() {
+  const { t } = useI18n();
   const [showSecret, setShowSecret] = useState(false);
   const [testing, setTesting] = useState(false);
   const [testResult, setTestResult] = useState<{ ok: boolean; msg: string } | null>(null);
@@ -262,7 +265,7 @@ function SyncTab() {
 
       <div className="flex items-center gap-4">
         <AccentButton onClick={testConnection} loading={testing} icon={LuRefreshCw}>
-          {testing ? "Testing..." : "Test Connection"}
+          {testing ? "Testing..." : t("settings.testConnection")}
         </AccentButton>
         {testResult && (
           <span className={`flex items-center gap-1.5 text-sm ${testResult.ok ? "text-green-600" : "text-red-500"}`}>
@@ -395,6 +398,7 @@ const NOTIFICATION_TRIGGERS = [
 ];
 
 function NotificationsTab() {
+  const { t } = useI18n();
   const [smtpHost, setSmtpHost] = useState("");
   const [smtpPort, setSmtpPort] = useState("587");
   const [smtpUser, setSmtpUser] = useState("");
@@ -576,10 +580,10 @@ function NotificationsTab() {
 
       <div className="flex items-center gap-4 flex-wrap">
         <AccentButton onClick={saveSettings} loading={saving} icon={LuSettings}>
-          {saving ? "Saving..." : "Save SMTP Settings"}
+          {saving ? "Saving..." : t("settings.saveSMTP")}
         </AccentButton>
         <AccentButton onClick={sendTestEmail} loading={testing} icon={LuBell}>
-          {testing ? "Sending..." : "Send Test Email"}
+          {testing ? "Sending..." : t("settings.sendTestEmail")}
         </AccentButton>
         {saveMsg && (
           <span className={`flex items-center gap-1.5 text-sm ${saveMsg.ok ? "text-green-600" : "text-red-500"}`}>
@@ -729,6 +733,7 @@ function PluginTab() {
 // ── Tab 7: Database ───────────────────────────────────────────────────────────
 
 function DatabaseTab() {
+  const { t } = useI18n();
   const [stats, setStats] = useState<DbStats | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -846,7 +851,7 @@ function DatabaseTab() {
 
       <div className="flex items-center gap-3 flex-wrap">
         <AccentButton onClick={handleExport} icon={LuDownload}>
-          Export DB
+          {t("settings.exportDb")}
         </AccentButton>
         <button
           onClick={handleImportClick}
@@ -854,7 +859,7 @@ function DatabaseTab() {
           className="flex items-center gap-2 bg-white border border-gray-200 text-gray-600 rounded-full px-5 py-2.5 text-sm font-medium hover:border-gray-300 hover:text-gray-800 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {importing ? <LuLoader className="w-4 h-4 animate-spin" /> : <LuUpload className="w-4 h-4" />}
-          {importing ? "Importing..." : "Import DB"}
+          {importing ? "Importing..." : t("settings.importDb")}
         </button>
         <button
           onClick={loadStats}
@@ -881,11 +886,12 @@ type ThemeMode = "light" | "dark" | "system";
 
 function ThemeTab() {
   const { theme, setTheme } = useTheme();
+  const { t } = useI18n();
 
   const options: { value: ThemeMode; label: string; desc: string; preview: string }[] = [
-    { value: "light", label: "Light", desc: "Always use light mode", preview: "bg-[#f0f0e8]" },
-    { value: "dark", label: "Dark", desc: "Always use dark mode", preview: "bg-[#0f0f0f]" },
-    { value: "system", label: "System", desc: "Follow your OS preference", preview: "bg-gradient-to-r from-[#f0f0e8] to-[#0f0f0f]" },
+    { value: "light", label: t("settings.light"), desc: "Always use light mode", preview: "bg-[#f0f0e8]" },
+    { value: "dark", label: t("settings.dark"), desc: "Always use dark mode", preview: "bg-[#0f0f0f]" },
+    { value: "system", label: t("settings.system"), desc: "Follow your OS preference", preview: "bg-gradient-to-r from-[#f0f0e8] to-[#0f0f0f]" },
   ];
 
   return (
@@ -984,23 +990,24 @@ type TabId =
 
 interface Tab {
   id: TabId;
-  label: string;
+  labelKey: string;
   icon: React.ElementType;
 }
 
 const TABS: Tab[] = [
-  { id: "scan", label: "Scan", icon: LuScan },
-  { id: "sync", label: "Sync", icon: LuRefreshCw },
-  { id: "automation", label: "Automation", icon: LuZap },
-  { id: "notifications", label: "Notifications", icon: LuBell },
-  { id: "mcp", label: "MCP", icon: LuServer },
-  { id: "plugin", label: "Plugin", icon: LuPlug },
-  { id: "database", label: "Database", icon: LuDatabase },
-  { id: "theme", label: "Theme", icon: LuPalette },
-  { id: "language", label: "Language", icon: LuGlobe },
+  { id: "scan", labelKey: "settings.scan", icon: LuScan },
+  { id: "sync", labelKey: "settings.sync", icon: LuRefreshCw },
+  { id: "automation", labelKey: "settings.automation", icon: LuZap },
+  { id: "notifications", labelKey: "settings.notifications", icon: LuBell },
+  { id: "mcp", labelKey: "settings.mcp", icon: LuServer },
+  { id: "plugin", labelKey: "settings.plugin", icon: LuPlug },
+  { id: "database", labelKey: "settings.database", icon: LuDatabase },
+  { id: "theme", labelKey: "settings.theme", icon: LuPalette },
+  { id: "language", labelKey: "settings.language", icon: LuGlobe },
 ];
 
 export default function SettingsPage() {
+  const { t } = useI18n();
   const [activeTab, setActiveTab] = useState<TabId>("scan");
 
   function renderContent() {
@@ -1021,13 +1028,13 @@ export default function SettingsPage() {
     <div className="space-y-6">
       <div className="flex items-center gap-3">
         <LuSettings className="w-7 h-7 text-[#1a1a1a]" />
-        <h1 className="text-3xl font-bold text-[#1a1a1a]">Settings</h1>
+        <h1 className="text-3xl font-bold text-[#1a1a1a]">{t("settings.title")}</h1>
       </div>
 
       <div className="flex gap-6">
         {/* Sidebar tab list */}
         <nav className="w-44 shrink-0 space-y-1">
-          {TABS.map(({ id, label, icon: Icon }) => (
+          {TABS.map(({ id, labelKey, icon: Icon }) => (
             <button
               key={id}
               onClick={() => setActiveTab(id)}
@@ -1038,7 +1045,7 @@ export default function SettingsPage() {
               }`}
             >
               <Icon className="w-4 h-4 shrink-0" />
-              {label}
+              {t(labelKey)}
             </button>
           ))}
         </nav>

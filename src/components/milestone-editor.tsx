@@ -13,6 +13,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useI18n } from "@/lib/i18n";
 
 export interface Milestone {
   id: number;
@@ -62,6 +63,7 @@ export function MilestoneEditor({
   onSaved,
   onDeleted,
 }: MilestoneEditorProps) {
+  const { t } = useI18n();
   const isNew = !milestone;
 
   const [projectId, setProjectId] = useState<string>(
@@ -173,7 +175,7 @@ export function MilestoneEditor({
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b shrink-0">
           <h2 className="font-semibold text-[#1a1a1a]">
-            {isNew ? "New Milestone" : "Edit Milestone"}
+            {isNew ? t("milestones.newMilestone") : t("milestones.editMilestone")}
           </h2>
           <button
             onClick={onClose}
@@ -187,7 +189,7 @@ export function MilestoneEditor({
         <div className="flex-1 px-6 py-5 flex flex-col gap-5">
           {/* Project */}
           <div className="flex flex-col gap-1.5">
-            <Label>Project</Label>
+            <Label>{t("milestones.project")}</Label>
             <Select value={projectId} onValueChange={(v) => v && setProjectId(v)}>
               <SelectTrigger className="w-full">
                 <SelectValue placeholder="Select project..." />
@@ -214,7 +216,7 @@ export function MilestoneEditor({
 
           {/* Description */}
           <div className="flex flex-col gap-1.5">
-            <Label>Description</Label>
+            <Label>{t("milestones.description")}</Label>
             <Textarea
               value={description}
               onChange={(e) => setDescription(e.target.value)}
@@ -225,7 +227,7 @@ export function MilestoneEditor({
 
           {/* Date */}
           <div className="flex flex-col gap-1.5">
-            <Label>Date</Label>
+            <Label>{t("milestones.date")}</Label>
             <Input
               type="date"
               value={date}
@@ -236,7 +238,7 @@ export function MilestoneEditor({
           {/* Status + Icon row */}
           <div className="grid grid-cols-2 gap-4">
             <div className="flex flex-col gap-1.5">
-              <Label>Status</Label>
+              <Label>{t("milestones.status")}</Label>
               <Select value={status} onValueChange={(v) => v && setStatus(v)}>
                 <SelectTrigger className="w-full">
                   <SelectValue />
@@ -252,7 +254,7 @@ export function MilestoneEditor({
             </div>
 
             <div className="flex flex-col gap-1.5">
-              <Label>Icon</Label>
+              <Label>{t("milestones.icon")}</Label>
               <Select value={icon} onValueChange={(v) => v && setIcon(v)}>
                 <SelectTrigger className="w-full">
                   <SelectValue />
@@ -284,21 +286,21 @@ export function MilestoneEditor({
               className="flex items-center gap-1.5 text-sm text-red-500 hover:text-red-700 transition-colors disabled:opacity-50"
             >
               <LuTrash2 className="w-4 h-4" />
-              {deleting ? "Deleting..." : "Delete"}
+              {deleting ? t("common.loading") : t("common.delete")}
             </button>
           ) : (
             <span />
           )}
           <div className="flex items-center gap-2">
             <Button variant="outline" onClick={onClose} disabled={saving || deleting}>
-              Cancel
+              {t("common.cancel")}
             </Button>
             <Button
               onClick={handleSave}
               disabled={saving || deleting}
               className="bg-[#c6e135] text-[#1a1a1a] hover:brightness-95"
             >
-              {saving ? "Saving..." : isNew ? "Create" : "Save Changes"}
+              {saving ? t("common.loading") : isNew ? t("common.create") : t("common.save")}
             </Button>
           </div>
         </div>

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import { useI18n } from "@/lib/i18n";
 
 // ---- Types ----
 
@@ -91,6 +92,7 @@ function DirectionPill({ dir }: { dir: "PUSH" | "PULL" | "FULL" }) {
 // ---- Main component ----
 
 export function SyncPanel() {
+  const { t } = useI18n();
   const [lastPush, setLastPush] = useState<string | null>(null);
   const [lastPull, setLastPull] = useState<string | null>(null);
   const [autoSync, setAutoSync] = useState(false);
@@ -207,12 +209,12 @@ export function SyncPanel() {
   };
 
   const statsRows = [
-    { label: "Projects", key: "projects" },
-    { label: "Issues", key: "issues" },
-    { label: "Notes", key: "notes" },
-    { label: "Releases", key: "releases" },
-    { label: "Milestones", key: "milestones" },
-    { label: "Feedback", key: "feedback" },
+    { label: t("projects.title"), key: "projects" },
+    { label: t("projects.issues"), key: "issues" },
+    { label: t("projects.notes"), key: "notes" },
+    { label: t("projects.releases"), key: "releases" },
+    { label: t("milestones.title"), key: "milestones" },
+    { label: t("feedback.title"), key: "feedback" },
   ];
 
   return (
@@ -220,29 +222,29 @@ export function SyncPanel() {
       {/* Status Cards */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         <StatusCard
-          label="Last Push"
-          value={lastPush ? formatTime(lastPush).split(",")[0] : "Never"}
+          label={t("sync.lastPush")}
+          value={lastPush ? formatTime(lastPush).split(",")[0] : t("sync.never")}
           sub={lastPush ? formatTime(lastPush).split(",")[1]?.trim() : undefined}
         />
         <StatusCard
-          label="Last Pull"
-          value={lastPull ? formatTime(lastPull).split(",")[0] : "Never"}
+          label={t("sync.lastPull")}
+          value={lastPull ? formatTime(lastPull).split(",")[0] : t("sync.never")}
           sub={lastPull ? formatTime(lastPull).split(",")[1]?.trim() : undefined}
         />
         <StatusCard
-          label="Server"
+          label={t("sync.server")}
           value={
             loadingStatus
-              ? "Checking..."
+              ? t("common.loading")
               : status?.serverOnline
-              ? "Online"
-              : "Offline"
+              ? t("sync.online")
+              : t("sync.offline")
           }
           sub={status?.serverUrl ?? "—"}
           accent={status?.serverOnline}
         />
         <StatusCard
-          label="Auto-Sync"
+          label={t("sync.autoSync")}
           value={autoSync ? "ON" : "OFF"}
           sub={autoSync ? "Enabled" : "Disabled"}
           accent={autoSync}
@@ -251,35 +253,35 @@ export function SyncPanel() {
 
       {/* Action Buttons */}
       <div className="bg-white rounded-2xl shadow-sm p-6">
-        <h2 className="text-base font-semibold text-[#1a1a1a] mb-4">Sync Actions</h2>
+        <h2 className="text-base font-semibold text-[#1a1a1a] mb-4">{t("sync.title")}</h2>
         <div className="flex flex-wrap gap-3">
           <button
             onClick={handlePush}
             disabled={running !== null}
             className="px-5 py-2.5 rounded-xl bg-blue-600 text-white text-sm font-semibold hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
-            {running === "push" ? "Pushing..." : "Push Now"}
+            {running === "push" ? t("sync.pushing") : t("sync.pushNow")}
           </button>
           <button
             onClick={handlePull}
             disabled={running !== null}
             className="px-5 py-2.5 rounded-xl bg-purple-600 text-white text-sm font-semibold hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
-            {running === "pull" ? "Pulling..." : "Pull Now"}
+            {running === "pull" ? t("sync.pulling") : t("sync.pullNow")}
           </button>
           <button
             onClick={handleFullSync}
             disabled={running !== null}
             className="px-5 py-2.5 rounded-xl bg-[#c6e135] text-[#1a1a1a] text-sm font-semibold hover:bg-[#b5d020] disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
-            {running === "full" ? "Syncing..." : "Full Sync"}
+            {running === "full" ? t("sync.syncing") : t("sync.fullSync")}
           </button>
           <button
             onClick={refreshStatus}
             disabled={loadingStatus}
             className="px-5 py-2.5 rounded-xl border border-gray-200 text-gray-600 text-sm font-semibold hover:bg-gray-50 disabled:opacity-50 transition-colors"
           >
-            {loadingStatus ? "Refreshing..." : "Refresh Status"}
+            {loadingStatus ? t("sync.refreshing") : t("sync.refreshStatus")}
           </button>
           <button
             onClick={toggleAutoSync}
@@ -289,21 +291,21 @@ export function SyncPanel() {
                 : "border border-gray-200 text-gray-500 hover:bg-gray-50"
             }`}
           >
-            Auto-Sync: {autoSync ? "ON" : "OFF"}
+            {t("sync.autoSync")}: {autoSync ? "ON" : "OFF"}
           </button>
         </div>
       </div>
 
       {/* Stats Comparison Table */}
       <div className="bg-white rounded-2xl shadow-sm p-6">
-        <h2 className="text-base font-semibold text-[#1a1a1a] mb-4">Data Comparison</h2>
+        <h2 className="text-base font-semibold text-[#1a1a1a] mb-4">{t("sync.statsComparison")}</h2>
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-gray-100">
                 <th className="text-left text-gray-500 font-medium py-2 pr-6">Data</th>
-                <th className="text-right text-gray-500 font-medium py-2 pr-6">Local</th>
-                <th className="text-right text-gray-500 font-medium py-2 pr-6">Server</th>
+                <th className="text-right text-gray-500 font-medium py-2 pr-6">{t("sync.local")}</th>
+                <th className="text-right text-gray-500 font-medium py-2 pr-6">{t("sync.server")}</th>
                 <th className="text-right text-gray-500 font-medium py-2">Status</th>
               </tr>
             </thead>
@@ -324,9 +326,9 @@ export function SyncPanel() {
                       {inSync === null ? (
                         <span className="text-gray-400 text-xs">N/A</span>
                       ) : inSync ? (
-                        <span className="text-green-600 text-xs font-medium">In sync</span>
+                        <span className="text-green-600 text-xs font-medium">{t("sync.inSync")}</span>
                       ) : (
-                        <span className="text-amber-600 text-xs font-medium">Out of sync</span>
+                        <span className="text-amber-600 text-xs font-medium">{t("sync.outOfSync")}</span>
                       )}
                     </td>
                   </tr>
@@ -340,7 +342,7 @@ export function SyncPanel() {
       {/* Sync Log */}
       <div className="bg-white rounded-2xl shadow-sm p-6">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-base font-semibold text-[#1a1a1a]">Sync Log</h2>
+          <h2 className="text-base font-semibold text-[#1a1a1a]">{t("sync.syncLog")}</h2>
           <span className="text-xs text-gray-400">Last {Math.min(log.length, 20)} operations</span>
         </div>
         {log.length === 0 ? (

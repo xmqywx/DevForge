@@ -15,6 +15,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useI18n } from "@/lib/i18n";
 
 interface Project {
   id: number;
@@ -46,6 +47,7 @@ export function ReleaseForm({
   onClose,
   onSaved,
 }: ReleaseFormProps) {
+  const { t } = useI18n();
   const isEditing = !!release;
 
   const [projectId, setProjectId] = useState<string>(
@@ -161,7 +163,7 @@ export function ReleaseForm({
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b shrink-0">
           <h2 className="text-lg font-semibold text-[#1a1a1a]">
-            {isEditing ? "Edit Release" : "New Release"}
+            {isEditing ? t("common.edit") + " " + t("releases.title").replace(/s$/, "") : t("releases.newRelease")}
           </h2>
           <button
             onClick={onClose}
@@ -177,7 +179,7 @@ export function ReleaseForm({
             {/* Project + Version row */}
             <div className="grid grid-cols-2 gap-4">
               <div className="flex flex-col gap-1.5">
-                <Label>Project</Label>
+                <Label>{t("milestones.project")}</Label>
                 <Select value={projectId} onValueChange={(v) => v && setProjectId(v)}>
                   <SelectTrigger className="w-full">
                     <SelectValue placeholder="Select project" />
@@ -193,7 +195,7 @@ export function ReleaseForm({
               </div>
 
               <div className="flex flex-col gap-1.5">
-                <Label>Version</Label>
+                <Label>{t("releases.version")}</Label>
                 <Input
                   value={version}
                   onChange={(e) => setVersion(e.target.value)}
@@ -215,7 +217,7 @@ export function ReleaseForm({
             {/* Changelog editor */}
             <div className="flex flex-col gap-1.5">
               <div className="flex items-center justify-between">
-                <Label>Changelog</Label>
+                <Label>{t("releases.changelog")}</Label>
                 <button
                   type="button"
                   onClick={handleGenerateChangelog}
@@ -232,7 +234,7 @@ export function ReleaseForm({
                   ) : (
                     <LuWand className="w-3.5 h-3.5" />
                   )}
-                  Generate from Git
+                  {t("releases.generateFromGit")}
                 </button>
               </div>
 
@@ -321,7 +323,7 @@ export function ReleaseForm({
             {/* Download URL */}
             <div className="flex flex-col gap-1.5">
               <Label>
-                Download URL{" "}
+                {t("releases.downloadUrl")}{" "}
                 <span className="text-gray-400 font-normal">(optional)</span>
               </Label>
               <Input
@@ -354,14 +356,14 @@ export function ReleaseForm({
                 onClick={onClose}
                 className="px-4 py-2 text-sm text-gray-600 hover:text-gray-800 transition-colors"
               >
-                Cancel
+                {t("common.cancel")}
               </button>
               <Button
                 type="submit"
                 disabled={saving}
                 className="bg-[#c6e135] text-[#1a1a1a] hover:brightness-95"
               >
-                {saving ? "Saving..." : isEditing ? "Save Changes" : "Create Release"}
+                {saving ? t("common.loading") : isEditing ? t("common.save") : t("common.create")}
               </Button>
             </div>
           </div>

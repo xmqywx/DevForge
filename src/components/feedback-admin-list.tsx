@@ -13,6 +13,7 @@ import {
   LuReply,
 } from "react-icons/lu";
 import { FeedbackReplyDrawer } from "./feedback-reply-drawer";
+import { useI18n } from "@/lib/i18n";
 
 const SERVER_URL =
   process.env.NEXT_PUBLIC_DEVFORGE_SERVER_URL ?? "https://forge.wdao.chat";
@@ -100,6 +101,7 @@ interface Props {
 }
 
 export function FeedbackAdminList({ items, onItemsChange }: Props) {
+  const { t } = useI18n();
   const [busy, setBusy] = useState<Record<number, boolean>>({});
   const [replyTarget, setReplyTarget] = useState<FeedbackItem | null>(null);
 
@@ -212,6 +214,7 @@ export function FeedbackAdminList({ items, onItemsChange }: Props) {
                   <span className="text-sm font-semibold text-[#1a1a1a]">
                     {item.upvotes ?? 0}
                   </span>
+                  <span className="text-[10px] text-gray-400">{t("feedback.votes")}</span>
                 </div>
               </div>
 
@@ -245,6 +248,7 @@ export function FeedbackAdminList({ items, onItemsChange }: Props) {
                   className={`px-3 py-1 rounded-full text-xs font-medium capitalize outline-none cursor-pointer disabled:opacity-50 ${
                     statusPill[item.status ?? "open"] ?? statusPill.open
                   }`}
+                  title={t("feedback.changeStatus")}
                 >
                   {STATUS_OPTIONS.map((s) => (
                     <option key={s} value={s}>
@@ -260,7 +264,7 @@ export function FeedbackAdminList({ items, onItemsChange }: Props) {
                   className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium bg-[#c6e135] text-[#1a1a1a] hover:opacity-90 transition-opacity disabled:opacity-50"
                 >
                   <LuReply className="w-3.5 h-3.5" />
-                  Reply
+                  {t("feedback.reply")}
                 </button>
 
                 {/* Convert to Issue */}
@@ -276,7 +280,7 @@ export function FeedbackAdminList({ items, onItemsChange }: Props) {
                     className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-600 hover:bg-gray-200 transition-colors disabled:opacity-50"
                   >
                     <LuMessageSquare className="w-3.5 h-3.5" />
-                    Convert to Issue
+                    {t("feedback.convertToIssue")}
                   </button>
                 )}
 
@@ -288,7 +292,7 @@ export function FeedbackAdminList({ items, onItemsChange }: Props) {
                     className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-medium text-red-500 hover:bg-red-50 transition-colors disabled:opacity-50"
                   >
                     <LuShield className="w-3.5 h-3.5" />
-                    Mark Spam
+                    {t("feedback.markSpam")}
                   </button>
                 )}
 

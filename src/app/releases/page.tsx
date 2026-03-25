@@ -11,6 +11,7 @@ import {
   LuCalendar,
 } from "react-icons/lu";
 import { ReleaseForm } from "@/components/release-form";
+import { useI18n } from "@/lib/i18n";
 
 interface Project {
   id: number;
@@ -62,6 +63,7 @@ function ReleaseCard({
   onEdit: (r: Release) => void;
   onDelete: (id: number) => void;
 }) {
+  const { t } = useI18n();
   const [expanded, setExpanded] = useState(false);
   const [deleting, setDeleting] = useState(false);
 
@@ -108,7 +110,7 @@ function ReleaseCard({
               target="_blank"
               rel="noopener noreferrer"
               className="p-2 rounded-lg text-gray-400 hover:text-[#1a1a1a] hover:bg-gray-100 transition-colors"
-              title="Download"
+              title={t("common.edit")}
             >
               <LuExternalLink className="w-4 h-4" />
             </a>
@@ -116,7 +118,7 @@ function ReleaseCard({
           <button
             onClick={() => onEdit(release)}
             className="p-2 rounded-lg text-gray-400 hover:text-[#1a1a1a] hover:bg-gray-100 transition-colors"
-            title="Edit"
+            title={t("common.edit")}
           >
             <LuPencil className="w-4 h-4" />
           </button>
@@ -124,7 +126,7 @@ function ReleaseCard({
             onClick={handleDelete}
             disabled={deleting}
             className="p-2 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 transition-colors disabled:opacity-50"
-            title="Delete"
+            title={t("common.delete")}
           >
             <LuTrash2 className="w-4 h-4" />
           </button>
@@ -148,7 +150,7 @@ function ReleaseCard({
             onClick={() => setExpanded((v) => !v)}
             className="w-full px-5 py-2 text-xs text-gray-400 hover:text-gray-600 border-t transition-colors text-center"
           >
-            {expanded ? "Hide changelog" : "Show changelog"}
+            {expanded ? `Hide ${t("releases.changelog")}` : `Show ${t("releases.changelog")}`}
           </button>
         </>
       )}
@@ -157,6 +159,7 @@ function ReleaseCard({
 }
 
 export default function ReleasesPage() {
+  const { t } = useI18n();
   const [releases, setReleases] = useState<ReleaseWithProject[]>([]);
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
@@ -264,13 +267,13 @@ export default function ReleasesPage() {
     <div className="space-y-5">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold text-[#1a1a1a]">Releases</h1>
+        <h1 className="text-3xl font-bold text-[#1a1a1a]">{t("releases.title")}</h1>
         <button
           onClick={handleOpenNew}
           className="flex items-center gap-2 bg-[#c6e135] text-[#1a1a1a] rounded-full px-4 py-2 text-sm font-medium hover:brightness-95 transition-all"
         >
           <LuPlus className="w-4 h-4" />
-          New Release
+          {t("releases.newRelease")}
         </button>
       </div>
 
@@ -283,7 +286,7 @@ export default function ReleasesPage() {
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Search releases..."
+            placeholder={t("releases.search")}
             className="bg-transparent outline-none text-sm text-[#1a1a1a] placeholder:text-gray-400 w-full"
           />
         </div>
@@ -294,7 +297,7 @@ export default function ReleasesPage() {
           onChange={(e) => setFilterProjectId(e.target.value)}
           className="bg-white rounded-full px-4 py-2 shadow-sm text-sm text-[#1a1a1a] outline-none cursor-pointer"
         >
-          <option value="all">All Projects</option>
+          <option value="all">{t("releases.allProjects")}</option>
           {projects.map((p) => (
             <option key={p.id} value={String(p.id)}>
               {p.name}
@@ -314,7 +317,7 @@ export default function ReleasesPage() {
                   : "text-gray-500 hover:text-gray-700"
               }`}
             >
-              {mode === "timeline" ? "Timeline" : "By Project"}
+              {mode === "timeline" ? t("releases.timeline") : t("releases.byProject")}
             </button>
           ))}
         </div>
@@ -323,20 +326,20 @@ export default function ReleasesPage() {
       {/* Count */}
       <div className="text-sm text-gray-500">
         {loading
-          ? "Loading..."
+          ? t("common.loading")
           : `${filtered.length} release${filtered.length !== 1 ? "s" : ""}`}
       </div>
 
       {/* Release list */}
       {!loading && filtered.length === 0 && (
         <div className="bg-white rounded-2xl shadow-sm px-8 py-16 text-center">
-          <p className="text-gray-400 text-sm">No releases yet.</p>
+          <p className="text-gray-400 text-sm">{t("releases.noReleases")}</p>
           <button
             onClick={handleOpenNew}
             className="mt-4 inline-flex items-center gap-2 bg-[#c6e135] text-[#1a1a1a] rounded-full px-4 py-2 text-sm font-medium hover:brightness-95 transition-all"
           >
             <LuPlus className="w-4 h-4" />
-            Create first release
+            {t("releases.newRelease")}
           </button>
         </div>
       )}

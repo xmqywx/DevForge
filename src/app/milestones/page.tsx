@@ -13,6 +13,7 @@ import {
   LuCircle,
 } from "react-icons/lu";
 import { MilestoneEditor, type Milestone } from "@/components/milestone-editor";
+import { useI18n } from "@/lib/i18n";
 
 interface Project {
   id: number;
@@ -44,11 +45,12 @@ function MilestoneIcon({
 
 // Status pill
 function StatusPill({ status }: { status: Milestone["status"] }) {
+  const { t } = useI18n();
   if (status === "completed") {
     return (
       <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-700">
         <LuCheck className="w-3 h-3" />
-        Completed
+        {t("milestones.completed")}
       </span>
     );
   }
@@ -56,14 +58,14 @@ function StatusPill({ status }: { status: Milestone["status"] }) {
     return (
       <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-[#c6e135]/30 text-[#5a6b00]">
         <LuCircleDot className="w-3 h-3" />
-        Current
+        {t("milestones.current")}
       </span>
     );
   }
   return (
     <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-500">
       <LuCircle className="w-3 h-3" />
-      Planned
+      {t("milestones.planned")}
     </span>
   );
 }
@@ -88,6 +90,7 @@ function nodeColorClass(status: Milestone["status"]) {
 }
 
 export default function MilestonesPage() {
+  const { t } = useI18n();
   const [milestones, setMilestones] = useState<Milestone[]>([]);
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
@@ -164,7 +167,7 @@ export default function MilestonesPage() {
       {/* Page header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-[#1a1a1a]">Milestones</h1>
+          <h1 className="text-3xl font-bold text-[#1a1a1a]">{t("milestones.title")}</h1>
           <p className="text-sm text-gray-500 mt-0.5">
             Track key events and goals across your projects
           </p>
@@ -174,7 +177,7 @@ export default function MilestonesPage() {
           className="flex items-center gap-2 bg-[#c6e135] text-[#1a1a1a] rounded-full px-4 py-2 text-sm font-medium hover:brightness-95 transition-all"
         >
           <LuPlus className="w-4 h-4" />
-          New Milestone
+          {t("milestones.newMilestone")}
         </button>
       </div>
 
@@ -186,7 +189,7 @@ export default function MilestonesPage() {
               <LuCheck className="w-4 h-4 text-emerald-600" />
             </div>
             <div>
-              <p className="text-xs text-gray-500">Completed</p>
+              <p className="text-xs text-gray-500">{t("milestones.completed")}</p>
               <p className="text-xl font-bold text-[#1a1a1a]">{completed}</p>
             </div>
           </div>
@@ -195,7 +198,7 @@ export default function MilestonesPage() {
               <LuCircleDot className="w-4 h-4 text-[#5a6b00]" />
             </div>
             <div>
-              <p className="text-xs text-gray-500">Current</p>
+              <p className="text-xs text-gray-500">{t("milestones.current")}</p>
               <p className="text-xl font-bold text-[#1a1a1a]">{current}</p>
             </div>
           </div>
@@ -204,7 +207,7 @@ export default function MilestonesPage() {
               <LuCircle className="w-4 h-4 text-gray-400" />
             </div>
             <div>
-              <p className="text-xs text-gray-500">Planned</p>
+              <p className="text-xs text-gray-500">{t("milestones.planned")}</p>
               <p className="text-xl font-bold text-[#1a1a1a]">{planned}</p>
             </div>
           </div>
@@ -218,7 +221,7 @@ export default function MilestonesPage() {
           onChange={(e) => setFilterProjectId(e.target.value)}
           className="bg-white rounded-full px-4 py-2 shadow-sm text-sm text-[#1a1a1a] outline-none cursor-pointer"
         >
-          <option value="all">All Projects</option>
+          <option value="all">{t("releases.allProjects")}</option>
           {projects.map((p) => (
             <option key={p.id} value={String(p.id)}>
               {p.name}
@@ -226,27 +229,27 @@ export default function MilestonesPage() {
           ))}
         </select>
         <span className="text-sm text-gray-400">
-          {loading ? "Loading..." : `${filtered.length} milestone${filtered.length !== 1 ? "s" : ""}`}
+          {loading ? t("common.loading") : `${filtered.length} milestone${filtered.length !== 1 ? "s" : ""}`}
         </span>
       </div>
 
       {/* Timeline */}
       {loading ? (
         <div className="flex items-center justify-center py-20 text-gray-400 text-sm">
-          Loading milestones...
+          {t("common.loading")}
         </div>
       ) : filtered.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-20 gap-4">
           <div className="w-16 h-16 bg-white rounded-2xl shadow-sm flex items-center justify-center">
             <LuFlag className="w-8 h-8 text-gray-300" />
           </div>
-          <p className="text-gray-400 text-sm">No milestones yet</p>
+          <p className="text-gray-400 text-sm">{t("milestones.noMilestones")}</p>
           <button
             onClick={openCreate}
             className="flex items-center gap-2 bg-[#c6e135] text-[#1a1a1a] rounded-full px-4 py-2 text-sm font-medium hover:brightness-95 transition-all"
           >
             <LuPlus className="w-4 h-4" />
-            Add First Milestone
+            {t("milestones.newMilestone")}
           </button>
         </div>
       ) : (

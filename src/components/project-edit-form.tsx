@@ -2,6 +2,7 @@
 
 import { useState, useCallback, KeyboardEvent } from "react";
 import { useRouter } from "next/navigation";
+import { useI18n } from "@/lib/i18n";
 import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import Placeholder from "@tiptap/extension-placeholder";
@@ -301,6 +302,7 @@ function Field({
 // ─── Main Component ───────────────────────────────────────────────────────────
 
 export function ProjectEditForm({ project }: ProjectEditFormProps) {
+  const { t } = useI18n();
   const router = useRouter();
 
   // Form state
@@ -407,12 +409,12 @@ export function ProjectEditForm({ project }: ProjectEditFormProps) {
       {/* Breadcrumb */}
       <div className="flex items-center gap-2 text-sm text-gray-500">
         <Link href="/projects" className="hover:text-[#1a1a1a] transition-colors">
-          Projects
+          {t("projects.title")}
         </Link>
         <span>/</span>
         <span className="text-[#1a1a1a] font-medium">{project.name}</span>
         <span>/</span>
-        <span className="text-gray-400">Edit</span>
+        <span className="text-gray-400">{t("common.edit")}</span>
       </div>
 
       {/* Header */}
@@ -436,7 +438,7 @@ export function ProjectEditForm({ project }: ProjectEditFormProps) {
               className="flex items-center gap-1.5 px-3 py-1.5 text-sm border border-gray-200 rounded-lg bg-white hover:bg-gray-50 text-[#1a1a1a] transition-colors"
             >
               <LuExternalLink className="w-3.5 h-3.5" />
-              Preview on Portal
+              {t("projects.previewPortal")}
             </a>
           )}
 
@@ -447,7 +449,7 @@ export function ProjectEditForm({ project }: ProjectEditFormProps) {
             className="flex items-center gap-1.5 px-4 py-2 text-sm font-medium bg-[#c6e135] text-[#1a1a1a] rounded-lg hover:bg-[#b8d42a] disabled:opacity-60 transition-colors"
           >
             <LuSave className="w-3.5 h-3.5" />
-            {saving ? "Saving…" : "Save"}
+            {saving ? t("common.saving") : t("common.save")}
           </button>
         </div>
       </div>
@@ -471,10 +473,10 @@ export function ProjectEditForm({ project }: ProjectEditFormProps) {
         <div className="lg:col-span-3 space-y-6">
           {/* Basic Info */}
           <div className="bg-white rounded-2xl shadow-sm p-6 space-y-5">
-            <h2 className="font-semibold text-[#1a1a1a]">Basic Info</h2>
+            <h2 className="font-semibold text-[#1a1a1a]">{t("projects.editProject")}</h2>
 
             <div className="grid grid-cols-2 gap-4">
-              <Field label="Project Name" htmlFor="name">
+              <Field label={t("projects.name")} htmlFor="name">
                 <Input
                   id="name"
                   value={name}
@@ -484,7 +486,7 @@ export function ProjectEditForm({ project }: ProjectEditFormProps) {
               </Field>
 
               <Field
-                label="Slug"
+                label={t("projects.slug")}
                 htmlFor="slug"
                 hint="Used in URLs. Changing it will redirect you."
               >
@@ -508,7 +510,7 @@ export function ProjectEditForm({ project }: ProjectEditFormProps) {
                 />
               </Field>
 
-              <Field label="Stage" htmlFor="stage">
+              <Field label={t("projects.stage")} htmlFor="stage">
                 <Select value={stage} onValueChange={(v) => setStage(v as typeof stage)}>
                   <SelectTrigger id="stage" className="w-full">
                     <SelectValue />
@@ -525,7 +527,7 @@ export function ProjectEditForm({ project }: ProjectEditFormProps) {
             </div>
 
             <div className="grid grid-cols-2 gap-4">
-              <Field label="Priority" htmlFor="priority">
+              <Field label={t("projects.priority")} htmlFor="priority">
                 <Select
                   value={priority}
                   onValueChange={(v) => setPriority(v as typeof priority)}
@@ -541,7 +543,7 @@ export function ProjectEditForm({ project }: ProjectEditFormProps) {
                 </Select>
               </Field>
 
-              <Field label="Visibility">
+              <Field label={t("projects.public")}>
                 <div className="flex items-center gap-3 h-8 pt-0.5">
                   <label className="flex items-center gap-2 cursor-pointer select-none">
                     <div
@@ -568,7 +570,7 @@ export function ProjectEditForm({ project }: ProjectEditFormProps) {
               </Field>
             </div>
 
-            <Field label="Description">
+            <Field label={t("projects.description")}>
               <TiptapEditor
                 value={description}
                 onChange={setDescription}
@@ -576,18 +578,18 @@ export function ProjectEditForm({ project }: ProjectEditFormProps) {
               />
             </Field>
 
-            <Field label="Tags" hint="Press Enter or comma to add a tag">
+            <Field label={t("projects.tags")} hint="Press Enter or comma to add a tag">
               <TagInput tags={tags} onChange={setTags} />
             </Field>
           </div>
 
           {/* Progress */}
           <div className="bg-white rounded-2xl shadow-sm p-6 space-y-5">
-            <h2 className="font-semibold text-[#1a1a1a]">Progress</h2>
+            <h2 className="font-semibold text-[#1a1a1a]">{t("projects.progress")}</h2>
 
             <div className="grid grid-cols-2 gap-4">
               <Field
-                label="Progress %"
+                label={t("projects.progress") + " %"}
                 htmlFor="progressPct"
                 hint="0–100"
               >
@@ -609,7 +611,7 @@ export function ProjectEditForm({ project }: ProjectEditFormProps) {
                 </div>
               </Field>
 
-              <Field label="Progress Phase" htmlFor="progressPhase" hint="e.g. Phase 2 / 5">
+              <Field label={t("projects.progress") + " Phase"} htmlFor="progressPhase" hint="e.g. Phase 2 / 5">
                 <Input
                   id="progressPhase"
                   value={progressPhase}
@@ -624,7 +626,7 @@ export function ProjectEditForm({ project }: ProjectEditFormProps) {
           <div className="bg-white rounded-2xl shadow-sm p-6 space-y-5">
             <h2 className="font-semibold text-[#1a1a1a]">Links</h2>
 
-            <Field label="GitHub URL" htmlFor="githubUrl">
+            <Field label={t("projects.githubUrl")} htmlFor="githubUrl">
               <Input
                 id="githubUrl"
                 value={githubUrl}
@@ -634,7 +636,7 @@ export function ProjectEditForm({ project }: ProjectEditFormProps) {
               />
             </Field>
 
-            <Field label="Website URL" htmlFor="websiteUrl">
+            <Field label={t("projects.websiteUrl")} htmlFor="websiteUrl">
               <Input
                 id="websiteUrl"
                 value={websiteUrl}
@@ -648,7 +650,7 @@ export function ProjectEditForm({ project }: ProjectEditFormProps) {
           {/* README */}
           <div className="bg-white rounded-2xl shadow-sm p-6 space-y-4">
             <div className="flex items-center justify-between">
-              <h2 className="font-semibold text-[#1a1a1a]">README</h2>
+              <h2 className="font-semibold text-[#1a1a1a]">{t("projects.readme")}</h2>
               <button
                 type="button"
                 onClick={handleSyncReadme}
@@ -663,7 +665,7 @@ export function ProjectEditForm({ project }: ProjectEditFormProps) {
                 <LuRefreshCw
                   className={`w-3.5 h-3.5 ${syncingReadme ? "animate-spin" : ""}`}
                 />
-                {syncingReadme ? "Syncing…" : "Sync README from file"}
+                {syncingReadme ? t("common.saving") : t("projects.syncReadme")}
               </button>
             </div>
 
@@ -695,7 +697,7 @@ export function ProjectEditForm({ project }: ProjectEditFormProps) {
             >
               <div className="flex items-center gap-2 text-sm text-[#1a1a1a]">
                 <LuTriangleAlert className="w-4 h-4 text-orange-500" />
-                Issues
+                {t("projects.issues")}
               </div>
               <div className="flex items-center gap-1.5">
                 <span className="font-bold text-[#1a1a1a]">{issueCount}</span>
@@ -713,7 +715,7 @@ export function ProjectEditForm({ project }: ProjectEditFormProps) {
             >
               <div className="flex items-center gap-2 text-sm text-[#1a1a1a]">
                 <LuMessageSquare className="w-4 h-4 text-blue-500" />
-                Notes
+                {t("projects.notes")}
               </div>
               <span className="font-bold text-[#1a1a1a]">{noteCount}</span>
             </Link>
@@ -724,7 +726,7 @@ export function ProjectEditForm({ project }: ProjectEditFormProps) {
             >
               <div className="flex items-center gap-2 text-sm text-[#1a1a1a]">
                 <LuTag className="w-4 h-4 text-purple-500" />
-                Releases
+                {t("projects.releases")}
               </div>
               <span className="font-bold text-[#1a1a1a]">{releaseCount}</span>
             </Link>
@@ -788,7 +790,7 @@ export function ProjectEditForm({ project }: ProjectEditFormProps) {
             className="w-full flex items-center justify-center gap-2 px-4 py-2.5 text-sm font-medium bg-[#c6e135] text-[#1a1a1a] rounded-xl hover:bg-[#b8d42a] disabled:opacity-60 transition-colors"
           >
             <LuSave className="w-4 h-4" />
-            {saving ? "Saving…" : "Save Changes"}
+            {saving ? t("common.saving") : t("common.save")}
           </button>
         </div>
       </div>

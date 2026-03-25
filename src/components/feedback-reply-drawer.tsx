@@ -16,6 +16,7 @@ import {
   LuImagePlus,
 } from "react-icons/lu";
 import type { FeedbackItem } from "./feedback-admin-list";
+import { useI18n } from "@/lib/i18n";
 
 const SERVER_URL =
   process.env.NEXT_PUBLIC_DEVFORGE_SERVER_URL ?? "https://forge.wdao.chat";
@@ -53,6 +54,7 @@ function ToolbarBtn({
 }
 
 export function FeedbackReplyDrawer({ feedback, onClose }: Props) {
+  const { t } = useI18n();
   const [sending, setSending] = useState(false);
   const [uploadingImage, setUploadingImage] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -151,7 +153,7 @@ export function FeedbackReplyDrawer({ feedback, onClose }: Props) {
         <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100 shrink-0">
           <div className="min-w-0">
             <h2 className="font-semibold text-[#1a1a1a] text-sm">
-              Reply to Feedback
+              {t("feedback.replyTo")} Feedback
             </h2>
             <p className="text-xs text-gray-400 truncate mt-0.5">
               {feedback.title}
@@ -257,7 +259,7 @@ export function FeedbackReplyDrawer({ feedback, onClose }: Props) {
             onClick={onClose}
             className="px-4 py-2 rounded-full text-sm text-gray-500 hover:bg-gray-100 transition-colors"
           >
-            Cancel
+            {t("common.cancel")}
           </button>
           <button
             onClick={handleSend}
@@ -269,7 +271,7 @@ export function FeedbackReplyDrawer({ feedback, onClose }: Props) {
             ) : (
               <LuSend className="w-4 h-4" />
             )}
-            Send Reply
+            {t("feedback.sendReply")}
           </button>
         </div>
       </div>

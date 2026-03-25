@@ -13,6 +13,7 @@ import {
   LuFlag,
   LuGitCommitHorizontal,
 } from "react-icons/lu";
+import { useI18n } from "@/lib/i18n";
 
 // ---- Types ----
 
@@ -166,6 +167,7 @@ interface DayCellProps {
 }
 
 function DayCell({ date, events, isToday, isSelected, isCurrentMonth, onClick }: DayCellProps) {
+  const { t } = useI18n();
   if (!date) {
     return <div className="h-28 bg-transparent" />;
   }
@@ -196,7 +198,7 @@ function DayCell({ date, events, isToday, isSelected, isCurrentMonth, onClick }:
           {date.getDate()}
         </span>
         {events.length > 0 && (
-          <span className="text-[10px] text-gray-400 leading-none">{events.length}</span>
+          <span className="text-[10px] text-gray-400 leading-none">{events.length} {t("calendar.events")}</span>
         )}
       </div>
       <div className="space-y-0.5 overflow-hidden">
@@ -218,6 +220,7 @@ interface DayDetailProps {
 }
 
 function DayDetail({ date, events, onClose }: DayDetailProps) {
+  const { t } = useI18n();
   const label = date.toLocaleDateString(undefined, {
     weekday: "long",
     year: "numeric",
@@ -233,12 +236,12 @@ function DayDetail({ date, events, onClose }: DayDetailProps) {
           onClick={onClose}
           className="text-gray-400 hover:text-gray-600 text-sm px-2 py-1 rounded-lg hover:bg-gray-100 transition-colors"
         >
-          Close
+          {t("common.cancel")}
         </button>
       </div>
 
       {events.length === 0 ? (
-        <p className="text-sm text-gray-400 py-4 text-center">No events on this day.</p>
+        <p className="text-sm text-gray-400 py-4 text-center">{t("calendar.noEvents")}</p>
       ) : (
         <div className="space-y-3">
           {events.map((ev) => {
@@ -306,6 +309,7 @@ function Legend() {
 // ---- Main Component ----
 
 export function CalendarView() {
+  const { t } = useI18n();
   const today = new Date();
   const todayStr = toLocalDateString(today);
 
@@ -367,7 +371,7 @@ export function CalendarView() {
     <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold text-[#1a1a1a]">Activity Calendar</h1>
+        <h1 className="text-3xl font-bold text-[#1a1a1a]">{t("calendar.title")}</h1>
         <div className="flex items-center gap-3">
           <button
             onClick={prevMonth}
@@ -389,10 +393,10 @@ export function CalendarView() {
 
       {/* Stats Row */}
       <div className="flex gap-4">
-        <StatCard label="Issues Created" value={stats.issuesCreated} />
-        <StatCard label="Issues Resolved" value={stats.issuesResolved} accent />
-        <StatCard label="Releases" value={stats.releasesPublished} />
-        <StatCard label="Feedback" value={stats.feedbackReceived} />
+        <StatCard label={t("calendar.issuesCreated")} value={stats.issuesCreated} />
+        <StatCard label={t("calendar.issuesResolved")} value={stats.issuesResolved} accent />
+        <StatCard label={t("calendar.releasesPublished")} value={stats.releasesPublished} />
+        <StatCard label={t("calendar.feedbackReceived")} value={stats.feedbackReceived} />
       </div>
 
       {/* Legend */}

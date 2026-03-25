@@ -2,8 +2,10 @@
 import { useRouter, usePathname } from "next/navigation";
 import { useState, useEffect, useRef } from "react";
 import { LuPlus, LuSearch, LuFilter, LuMessageSquare, LuCalendar, LuX } from "react-icons/lu";
+import { useI18n } from "@/lib/i18n";
 
 export function FloatingActions() {
+  const { t } = useI18n();
   const router = useRouter();
   const pathname = usePathname();
   const [showSearch, setShowSearch] = useState(false);
@@ -76,7 +78,7 @@ export function FloatingActions() {
                 setSearchQuery("");
               }
             }}
-            placeholder="Search projects..."
+            placeholder={t("actions.search")}
             className="flex-1 text-sm outline-none bg-transparent text-[#1a1a1a] placeholder-gray-400"
           />
           <button
@@ -91,7 +93,7 @@ export function FloatingActions() {
       {/* Add */}
       <button
         onClick={handleAdd}
-        title="Add new item"
+        title={t("actions.addNew")}
         className="w-12 h-12 bg-[#1a1a1a] text-white rounded-full flex items-center justify-center hover:bg-[#333] transition-colors shadow-lg"
       >
         <LuPlus className="w-5 h-5" />
@@ -100,7 +102,7 @@ export function FloatingActions() {
       {/* Search */}
       <button
         onClick={handleSearch}
-        title="Search"
+        title={t("actions.search")}
         className={`w-12 h-12 rounded-full flex items-center justify-center transition-colors shadow-lg ${
           showSearch ? "bg-[#c6e135] text-[#1a1a1a]" : "bg-[#1a1a1a] text-white hover:bg-[#333]"
         }`}
@@ -111,7 +113,7 @@ export function FloatingActions() {
       {/* Filter */}
       <button
         onClick={handleFilter}
-        title="Filter"
+        title={t("actions.filter")}
         className="w-12 h-12 bg-[#1a1a1a] text-white rounded-full flex items-center justify-center hover:bg-[#333] transition-colors shadow-lg"
       >
         <LuFilter className="w-5 h-5" />
@@ -120,7 +122,7 @@ export function FloatingActions() {
       {/* Feedback */}
       <button
         onClick={handleMessages}
-        title="Feedback"
+        title={t("actions.feedback")}
         className={`w-12 h-12 rounded-full flex items-center justify-center transition-colors shadow-lg ${
           pathname.startsWith("/feedback") ? "bg-[#c6e135] text-[#1a1a1a]" : "bg-[#1a1a1a] text-white hover:bg-[#333]"
         }`}
@@ -131,7 +133,7 @@ export function FloatingActions() {
       {/* Calendar / Milestones */}
       <button
         onClick={handleCalendar}
-        title="Calendar"
+        title={t("actions.calendar")}
         className={`w-12 h-12 rounded-full flex items-center justify-center transition-colors shadow-lg ${
           pathname.startsWith("/calendar") ? "bg-[#c6e135] text-[#1a1a1a]" : "bg-[#1a1a1a] text-white hover:bg-[#333]"
         }`}

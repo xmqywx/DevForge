@@ -7,6 +7,7 @@ import {
   STATUS_OPTIONS,
   type FeedbackItem,
 } from "@/components/feedback-admin-list";
+import { useI18n } from "@/lib/i18n";
 
 const SERVER_URL =
   process.env.NEXT_PUBLIC_DEVFORGE_SERVER_URL ?? "https://forge.wdao.chat";
@@ -29,6 +30,7 @@ async function fetchFromServer(): Promise<FeedbackItem[]> {
 }
 
 export default function FeedbackPage() {
+  const { t } = useI18n();
   const [items, setItems] = useState<FeedbackItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -83,7 +85,7 @@ export default function FeedbackPage() {
       {/* Page header */}
       <div className="flex items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-[#1a1a1a]">Feedback</h1>
+          <h1 className="text-3xl font-bold text-[#1a1a1a]">{t("feedback.title")}</h1>
           {lastFetched && (
             <p className="text-xs text-gray-400 mt-1">
               Last updated {lastFetched.toLocaleTimeString()}
@@ -98,7 +100,7 @@ export default function FeedbackPage() {
           <LuRefreshCw
             className={`w-4 h-4 ${refreshing ? "animate-spin" : ""}`}
           />
-          Refresh
+          {t("feedback.refresh")}
         </button>
       </div>
 
@@ -115,7 +117,7 @@ export default function FeedbackPage() {
                 : "bg-white text-gray-500 hover:bg-gray-100 shadow-sm"
             }`}
           >
-            {opt === "all" ? "All" : opt.replace(/-/g, " ")}
+            {opt === "all" ? t("feedback.all") : opt.replace(/-/g, " ")}
           </button>
         ))}
         <span className="text-sm text-gray-400 ml-auto">
@@ -130,10 +132,9 @@ export default function FeedbackPage() {
         </div>
       ) : filtered.length === 0 ? (
         <p className="text-gray-400 text-center py-12">
-          No feedback{" "}
           {filter !== "all"
-            ? `with status "${filter.replace(/-/g, " ")}"`
-            : "yet"}
+            ? `${t("feedback.noFeedback")} with status "${filter.replace(/-/g, " ")}"`
+            : t("feedback.noFeedback")}
         </p>
       ) : (
         <FeedbackAdminList items={filtered} onItemsChange={setItems} />
