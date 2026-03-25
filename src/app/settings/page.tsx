@@ -798,9 +798,6 @@ function DatabaseTab() {
     }
   }
 
-  // suppress unused variable warning
-  void fileInputRef;
-
   return (
     <div className="space-y-6">
       <SectionTitle>Database</SectionTitle>
