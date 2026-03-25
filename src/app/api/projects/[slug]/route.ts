@@ -2,6 +2,7 @@ import { db } from "@/db/client";
 import { projects, issues, notes } from "@/db/schema";
 import { eq, desc, sql } from "drizzle-orm";
 import { getProjectWithGit } from "@/lib/queries";
+import { syncProject } from "@/lib/auto-sync";
 
 export const dynamic = "force-dynamic";
 
@@ -53,6 +54,10 @@ export async function PATCH(
     .where(eq(projects.slug, slug))
     .returning()
     .get();
+
+  if (row?.isPublic) {
+    syncProject(row.id);
+  }
 
   return Response.json(row);
 }

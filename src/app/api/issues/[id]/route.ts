@@ -1,6 +1,7 @@
 import { db } from "@/db/client";
 import { issues } from "@/db/schema";
 import { eq, sql } from "drizzle-orm";
+import { syncProject } from "@/lib/auto-sync";
 
 export const dynamic = "force-dynamic";
 
@@ -36,6 +37,10 @@ export async function PATCH(
     .returning()
     .get();
 
+  if (row?.projectId) {
+    syncProject(row.projectId);
+  }
+
   return Response.json(row);
 }
 
@@ -55,5 +60,6 @@ export async function DELETE(
   }
 
   db.delete(issues).where(eq(issues.id, Number(id))).run();
+  syncProject(existing.projectId);
   return Response.json({ deleted: true });
 }

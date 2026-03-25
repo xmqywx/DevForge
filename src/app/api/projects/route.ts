@@ -2,6 +2,7 @@ import { type NextRequest } from "next/server";
 import { db } from "@/db/client";
 import { projects, issues } from "@/db/schema";
 import { eq, desc, sql, inArray } from "drizzle-orm";
+import { pushToServer } from "@/lib/auto-sync";
 
 export const dynamic = "force-dynamic";
 
@@ -44,5 +45,8 @@ export async function GET(request: NextRequest) {
 export async function POST(request: Request) {
   const body = await request.json();
   const row = db.insert(projects).values(body).returning().get();
+  if (row?.isPublic) {
+    pushToServer({ projects: [row] });
+  }
   return Response.json(row, { status: 201 });
 }

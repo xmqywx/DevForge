@@ -1,6 +1,7 @@
 import { db } from "@/db/client";
 import { milestones } from "@/db/schema";
 import { eq } from "drizzle-orm";
+import { syncProject } from "@/lib/auto-sync";
 
 export const dynamic = "force-dynamic";
 
@@ -27,6 +28,8 @@ export async function PATCH(
     .returning()
     .get();
 
+  syncProject(existing.projectId);
+
   return Response.json(row);
 }
 
@@ -46,5 +49,6 @@ export async function DELETE(
   }
 
   db.delete(milestones).where(eq(milestones.id, Number(id))).run();
+  syncProject(existing.projectId);
   return Response.json({ deleted: true });
 }

@@ -2,6 +2,7 @@ import { type NextRequest } from "next/server";
 import { db } from "@/db/client";
 import { milestones, projects } from "@/db/schema";
 import { eq, desc } from "drizzle-orm";
+import { syncProject } from "@/lib/auto-sync";
 
 export const dynamic = "force-dynamic";
 
@@ -49,5 +50,8 @@ export async function GET(request: NextRequest) {
 export async function POST(request: Request) {
   const body = await request.json();
   const row = db.insert(milestones).values(body).returning().get();
+  if (row?.projectId) {
+    syncProject(row.projectId);
+  }
   return Response.json(row, { status: 201 });
 }
