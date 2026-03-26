@@ -241,7 +241,7 @@ export default function ReleasesPage() {
 
   // Filter
   const filtered = releases.filter((r) => {
-    if (filterProjectId !== "all" && r.projectId !== Number(filterProjectId))
+    if (filterProjectId !== "all" && r.projectId !== filterProjectId)
       return false;
     if (
       searchQuery &&
