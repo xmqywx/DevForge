@@ -9,7 +9,7 @@ type WSEvent = {
 
 export function useDevForgeWS(onEvent: (event: WSEvent) => void) {
   const wsRef = useRef<WebSocket | null>(null);
-  const reconnectTimer = useRef<NodeJS.Timeout>();
+  const reconnectTimer = useRef<NodeJS.Timeout | undefined>(undefined);
 
   const connect = useCallback(() => {
     const serverUrl = process.env.NEXT_PUBLIC_DEVFORGE_SERVER_URL ?? "https://forge.wdao.chat";

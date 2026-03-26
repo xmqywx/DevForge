@@ -32,7 +32,7 @@ import {
 // ─── Types ────────────────────────────────────────────────────────────────────
 
 interface ProjectData {
-  id: number;
+  id: string;
   slug: string;
   name: string;
   description: string | null;
@@ -49,9 +49,9 @@ interface ProjectData {
   readme: string | null;
   createdAt: string | null;
   updatedAt: string | null;
-  issues?: Array<{ id: number; status: string }>;
-  notes?: Array<{ id: number }>;
-  releases?: Array<{ id: number }>;
+  issues?: Array<{ id: string; status: string }>;
+  notes?: Array<{ id: string }>;
+  releases?: Array<{ id: string }>;
 }
 
 interface ProjectEditFormProps {

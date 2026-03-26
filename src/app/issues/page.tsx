@@ -96,6 +96,7 @@ function IssueDrawer({
   const [commentSending, setCommentSending] = useState(false);
   const [commentsLoading, setCommentsLoading] = useState(false);
   const commentsEndRef = useRef<HTMLDivElement>(null);
+  const [editingDesc, setEditingDesc] = useState(false);
 
   // Reset when issue changes
   useEffect(() => {

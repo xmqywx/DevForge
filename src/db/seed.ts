@@ -47,7 +47,7 @@ export async function seedFromScan(
       .where(eq(projects.slug, slug))
       .get();
 
-    let projectId: number;
+    let projectId: string;
 
     if (!existing) {
       const result = db
