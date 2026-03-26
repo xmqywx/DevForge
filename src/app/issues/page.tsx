@@ -365,6 +365,127 @@ function IssueDrawer({
   );
 }
 
+// Searchable project dropdown — supports both typing and clicking
+function ProjectCombobox({
+  projects,
+  value,
+  onChange,
+  placeholder,
+}: {
+  projects: Project[];
+  value: string;
+  onChange: (v: string) => void;
+  placeholder: string;
+}) {
+  const [open, setOpen] = useState(false);
+  const [query, setQuery] = useState("");
+  const wrapperRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  // Close on outside click
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (wrapperRef.current && !wrapperRef.current.contains(e.target as Node)) {
+        setOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, []);
+
+  const selectedName =
+    value === "all"
+      ? ""
+      : projects.find((p) => String(p.id) === value)?.name ?? "";
+
+  const filtered = projects.filter(
+    (p) =>
+      !query ||
+      p.name.toLowerCase().includes(query.toLowerCase()) ||
+      p.slug.toLowerCase().includes(query.toLowerCase())
+  );
+
+  return (
+    <div ref={wrapperRef} className="relative min-w-[180px]">
+      <div
+        className="flex items-center gap-2 bg-white rounded-full px-4 py-2 shadow-sm cursor-pointer"
+        onClick={() => {
+          setOpen(true);
+          setTimeout(() => inputRef.current?.focus(), 0);
+        }}
+      >
+        <input
+          ref={inputRef}
+          type="text"
+          value={open ? query : selectedName || placeholder}
+          onChange={(e) => {
+            setQuery(e.target.value);
+            if (!open) setOpen(true);
+          }}
+          onFocus={() => {
+            setOpen(true);
+            setQuery("");
+          }}
+          onKeyDown={(e) => {
+            if (e.key === "Escape") {
+              setOpen(false);
+              setQuery("");
+              inputRef.current?.blur();
+            }
+          }}
+          placeholder={placeholder}
+          className={`bg-transparent outline-none text-sm w-full ${
+            !open && !selectedName ? "text-[#1a1a1a]" : "text-[#1a1a1a]"
+          } ${!open && !selectedName ? "font-normal" : ""} placeholder:text-[#1a1a1a]`}
+        />
+        <LuSearch className="w-3.5 h-3.5 text-gray-400 shrink-0" />
+      </div>
+
+      {open && (
+        <div className="absolute top-full left-0 right-0 mt-1 bg-white rounded-2xl shadow-xl border border-gray-100 max-h-64 overflow-y-auto z-50">
+          {/* All projects option */}
+          <button
+            onClick={() => {
+              onChange("all");
+              setOpen(false);
+              setQuery("");
+            }}
+            className={`w-full text-left px-4 py-2.5 text-sm hover:bg-gray-50 transition-colors ${
+              value === "all" ? "text-[#1a1a1a] font-medium bg-[#c6e135]/20" : "text-gray-600"
+            }`}
+          >
+            {placeholder}
+          </button>
+
+          {filtered.length === 0 ? (
+            <div className="px-4 py-3 text-sm text-gray-400 text-center">
+              No matching projects
+            </div>
+          ) : (
+            filtered.map((p) => (
+              <button
+                key={p.id}
+                onClick={() => {
+                  onChange(String(p.id));
+                  setOpen(false);
+                  setQuery("");
+                }}
+                className={`w-full text-left px-4 py-2.5 text-sm hover:bg-gray-50 transition-colors ${
+                  String(p.id) === value
+                    ? "text-[#1a1a1a] font-medium bg-[#c6e135]/20"
+                    : "text-gray-600"
+                }`}
+              >
+                {p.name}
+              </button>
+            ))
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function IssuesPage() {
   const { t } = useI18n();
   const [issues, setIssues] = useState<KanbanIssue[]>([]);
@@ -509,19 +630,13 @@ export default function IssuesPage() {
           />
         </div>
 
-        {/* Project filter */}
-        <select
+        {/* Project filter — searchable dropdown */}
+        <ProjectCombobox
+          projects={projects}
           value={filterProjectId}
-          onChange={(e) => setFilterProjectId(e.target.value)}
-          className="bg-white rounded-full px-4 py-2 shadow-sm text-sm text-[#1a1a1a] outline-none cursor-pointer"
-        >
-          <option value="all">{t("issues.allProjects")}</option>
-          {projects.map((p) => (
-            <option key={p.id} value={String(p.id)}>
-              {p.name}
-            </option>
-          ))}
-        </select>
+          onChange={setFilterProjectId}
+          placeholder={t("issues.allProjects")}
+        />
 
         {/* Priority pills */}
         <div className="flex items-center gap-1.5">
