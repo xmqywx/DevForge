@@ -1,8 +1,9 @@
 import { sqliteTable, text, integer } from "drizzle-orm/sqlite-core";
 import { sql } from "drizzle-orm";
+import { randomUUID } from "crypto";
 
 export const projects = sqliteTable("projects", {
-  id: integer("id").primaryKey({ autoIncrement: true }),
+  id: text("id").primaryKey().$defaultFn(() => randomUUID()),
   slug: text("slug").notNull().unique(),
   name: text("name").notNull(),
   description: text("description").default(""),
@@ -27,24 +28,24 @@ export const projects = sqliteTable("projects", {
 });
 
 export const issues = sqliteTable("issues", {
-  id: integer("id").primaryKey({ autoIncrement: true }),
-  projectId: integer("project_id").notNull().references(() => projects.id, { onDelete: "cascade" }),
+  id: text("id").primaryKey().$defaultFn(() => randomUUID()),
+  projectId: text("project_id").notNull().references(() => projects.id, { onDelete: "cascade" }),
   title: text("title").notNull(),
   description: text("description").default(""),
   type: text("type", { enum: ["bug", "feature", "improvement", "question", "task", "note"] }).default("task"),
   status: text("status", { enum: ["open", "in-progress", "resolved", "wont-fix", "deferred", "closed"] }).default("open"),
   priority: text("priority", { enum: ["high", "medium", "low"] }).default("medium"),
   source: text("source", { enum: ["manual", "auto", "feedback"] }).default("manual"),
-  feedbackId: integer("feedback_id"),
-  dependsOn: text("depends_on", { mode: "json" }).$type<number[]>().default([]),
+  feedbackId: text("feedback_id"),
+  dependsOn: text("depends_on", { mode: "json" }).$type<string[]>().default([]),
   createdAt: text("created_at").default(sql`(datetime('now'))`),
   updatedAt: text("updated_at").default(sql`(datetime('now'))`),
   resolvedAt: text("resolved_at"),
 });
 
 export const notes = sqliteTable("notes", {
-  id: integer("id").primaryKey({ autoIncrement: true }),
-  projectId: integer("project_id").notNull().references(() => projects.id, { onDelete: "cascade" }),
+  id: text("id").primaryKey().$defaultFn(() => randomUUID()),
+  projectId: text("project_id").notNull().references(() => projects.id, { onDelete: "cascade" }),
   title: text("title").notNull(),
   content: text("content").default(""),
   source: text("source", { enum: ["manual", "auto", "session-summary"] }).default("manual"),
@@ -53,8 +54,8 @@ export const notes = sqliteTable("notes", {
 });
 
 export const gitSnapshots = sqliteTable("git_snapshots", {
-  id: integer("id").primaryKey({ autoIncrement: true }),
-  projectId: integer("project_id").notNull().references(() => projects.id, { onDelete: "cascade" }),
+  id: text("id").primaryKey().$defaultFn(() => randomUUID()),
+  projectId: text("project_id").notNull().references(() => projects.id, { onDelete: "cascade" }),
   branch: text("branch"),
   lastCommitHash: text("last_commit_hash"),
   lastCommitMsg: text("last_commit_msg"),
@@ -72,8 +73,8 @@ export const settings = sqliteTable("settings", {
 });
 
 export const feedback = sqliteTable("feedback", {
-  id: integer("id").primaryKey({ autoIncrement: true }),
-  projectId: integer("project_id").notNull().references(() => projects.id, { onDelete: "cascade" }),
+  id: text("id").primaryKey().$defaultFn(() => randomUUID()),
+  projectId: text("project_id").notNull().references(() => projects.id, { onDelete: "cascade" }),
   authorName: text("author_name").default("匿名"),
   authorIp: text("author_ip"),
   title: text("title").notNull(),
@@ -83,15 +84,15 @@ export const feedback = sqliteTable("feedback", {
   upvotes: integer("upvotes").default(0),
   images: text("images", { mode: "json" }).$type<string[]>().default([]),
   isConverted: integer("is_converted", { mode: "boolean" }).default(false),
-  issueId: integer("issue_id"),
+  issueId: text("issue_id"),
   avatarUrl: text("avatar_url"),
   createdAt: text("created_at").default(sql`(datetime('now'))`),
   updatedAt: text("updated_at").default(sql`(datetime('now'))`),
 });
 
 export const feedbackReplies = sqliteTable("feedback_replies", {
-  id: integer("id").primaryKey({ autoIncrement: true }),
-  feedbackId: integer("feedback_id").notNull().references(() => feedback.id, { onDelete: "cascade" }),
+  id: text("id").primaryKey().$defaultFn(() => randomUUID()),
+  feedbackId: text("feedback_id").notNull().references(() => feedback.id, { onDelete: "cascade" }),
   authorName: text("author_name").default("匿名"),
   authorIp: text("author_ip"),
   isOwner: integer("is_owner", { mode: "boolean" }).default(false),
@@ -102,22 +103,22 @@ export const feedbackReplies = sqliteTable("feedback_replies", {
 });
 
 export const feedbackVotes = sqliteTable("feedback_votes", {
-  id: integer("id").primaryKey({ autoIncrement: true }),
-  feedbackId: integer("feedback_id").notNull().references(() => feedback.id, { onDelete: "cascade" }),
+  id: text("id").primaryKey().$defaultFn(() => randomUUID()),
+  feedbackId: text("feedback_id").notNull().references(() => feedback.id, { onDelete: "cascade" }),
   voterIp: text("voter_ip").notNull(),
   createdAt: text("created_at").default(sql`(datetime('now'))`),
 });
 
 export const issueVotes = sqliteTable("issue_votes", {
-  id: integer("id").primaryKey({ autoIncrement: true }),
-  issueId: integer("issue_id").notNull().references(() => issues.id, { onDelete: "cascade" }),
+  id: text("id").primaryKey().$defaultFn(() => randomUUID()),
+  issueId: text("issue_id").notNull().references(() => issues.id, { onDelete: "cascade" }),
   voterIp: text("voter_ip").notNull(),
   createdAt: text("created_at").default(sql`(datetime('now'))`),
 });
 
 export const issueComments = sqliteTable("issue_comments", {
-  id: integer("id").primaryKey({ autoIncrement: true }),
-  issueId: integer("issue_id").notNull().references(() => issues.id, { onDelete: "cascade" }),
+  id: text("id").primaryKey().$defaultFn(() => randomUUID()),
+  issueId: text("issue_id").notNull().references(() => issues.id, { onDelete: "cascade" }),
   authorName: text("author_name").default("匿名"),
   authorIp: text("author_ip"),
   isOwner: integer("is_owner", { mode: "boolean" }).default(false),
@@ -128,8 +129,8 @@ export const issueComments = sqliteTable("issue_comments", {
 });
 
 export const releases = sqliteTable("releases", {
-  id: integer("id").primaryKey({ autoIncrement: true }),
-  projectId: integer("project_id").notNull().references(() => projects.id, { onDelete: "cascade" }),
+  id: text("id").primaryKey().$defaultFn(() => randomUUID()),
+  projectId: text("project_id").notNull().references(() => projects.id, { onDelete: "cascade" }),
   version: text("version").notNull(),
   title: text("title").notNull(),
   content: text("content").notNull(),
@@ -139,8 +140,8 @@ export const releases = sqliteTable("releases", {
 });
 
 export const milestones = sqliteTable("milestones", {
-  id: integer("id").primaryKey({ autoIncrement: true }),
-  projectId: integer("project_id").notNull().references(() => projects.id, { onDelete: "cascade" }),
+  id: text("id").primaryKey().$defaultFn(() => randomUUID()),
+  projectId: text("project_id").notNull().references(() => projects.id, { onDelete: "cascade" }),
   title: text("title").notNull(),
   description: text("description").default(""),
   status: text("status", { enum: ["completed", "current", "planned"] }).default("planned"),
