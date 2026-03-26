@@ -186,6 +186,7 @@ function TiptapEditor({
   minHeight?: string;
 }) {
   const editor = useEditor({
+    immediatelyRender: false,
     extensions: [
       StarterKit,
       Placeholder.configure({ placeholder: placeholder ?? "Write something…" }),

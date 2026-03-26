@@ -31,7 +31,8 @@ function readReadme(repoPath: string): string | null {
 export async function seedFromScan(
   scanPaths?: string[]
 ): Promise<{ total: number; created: number; updated: number }> {
-  const paths = scanPaths ?? [resolve(homedir(), "Documents")];
+  const envPaths = process.env.SCAN_PATHS?.split(",").map(p => p.trim().replace("~", homedir()));
+  const paths = scanPaths ?? envPaths ?? [resolve(homedir(), "Documents")];
   const repos = await scanGitRepos(paths);
 
   let created = 0;

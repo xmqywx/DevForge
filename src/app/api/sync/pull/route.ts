@@ -17,6 +17,30 @@ const SERVER_URL =
 const SYNC_SECRET =
   process.env.DEVFORGE_SYNC_SECRET ?? "devforge-sync-2026";
 
+// Portal mode: return feedback data to Dashboard
+export async function GET(request: Request) {
+  const secret = request.headers.get("x-sync-secret");
+  if (secret !== SYNC_SECRET) {
+    return NextResponse.json({ error: "Invalid sync secret" }, { status: 401 });
+  }
+
+  const allFeedback = db.select().from(feedback).all();
+  const allReplies = db.select().from(feedbackReplies).all();
+  const allFeedbackVotes = db.select().from(feedbackVotes).all();
+  const allIssueVotes = db.select().from(issueVotes).all();
+  const allIssueComments = db.select().from(issueComments).all();
+  const feedbackIssues = db.select().from(issues).where(eq(issues.source, "feedback")).all();
+
+  return NextResponse.json({
+    feedback: allFeedback,
+    feedback_replies: allReplies,
+    feedback_votes: allFeedbackVotes,
+    issue_votes: allIssueVotes,
+    issue_comments: allIssueComments,
+    feedback_issues: feedbackIssues,
+  });
+}
+
 export async function POST() {
   try {
     const res = await fetch(`${SERVER_URL}/api/sync/pull`, {
