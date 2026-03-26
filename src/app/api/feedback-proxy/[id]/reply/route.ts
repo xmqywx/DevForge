@@ -15,7 +15,7 @@ export async function POST(
   }
 
   try {
-    const result = await ownerReply(Number(id), content);
+    const result = await ownerReply(id, content);
     return Response.json(result, { status: 201 });
   } catch (err) {
     const message = err instanceof Error ? err.message : "Reply failed";

@@ -117,7 +117,7 @@ export function ReleaseForm({
 
     const content = editor?.getHTML() ?? "";
     const payload = {
-      projectId: Number(projectId),
+      projectId,
       version: version.trim(),
       title: title.trim(),
       content,

@@ -2,7 +2,7 @@ import { type NextRequest } from "next/server";
 import { db } from "@/db/client";
 import { milestones, projects } from "@/db/schema";
 import { eq, desc } from "drizzle-orm";
-import { syncProject } from "@/lib/auto-sync";
+import { getSyncService } from "../../../../packages/sync";
 
 export const dynamic = "force-dynamic";
 
@@ -24,7 +24,7 @@ export async function GET(request: NextRequest) {
         })
         .from(milestones)
         .leftJoin(projects, eq(milestones.projectId, projects.id))
-        .where(eq(milestones.projectId, Number(projectId)))
+        .where(eq(milestones.projectId, projectId))
         .orderBy(milestones.date)
         .all()
     : db
@@ -44,14 +44,14 @@ export async function GET(request: NextRequest) {
         .orderBy(milestones.date)
         .all();
 
-  autoPush(); return Response.json(rows);
+  return Response.json(rows);
 }
 
 export async function POST(request: Request) {
   const body = await request.json();
   const row = db.insert(milestones).values(body).returning().get();
   if (row?.projectId) {
-    syncProject(row.projectId);
+    getSyncService().pushProjectById(row.projectId);
   }
-  autoPush(); return Response.json(row, { status: 201 });
+  return Response.json(row, { status: 201 });
 }

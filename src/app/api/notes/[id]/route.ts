@@ -1,6 +1,7 @@
 import { db } from "@/db/client";
 import { notes } from "@/db/schema";
 import { eq } from "drizzle-orm";
+import { getSyncService } from "../../../../../packages/sync";
 
 export const dynamic = "force-dynamic";
 
@@ -14,20 +15,21 @@ export async function PATCH(
   const existing = db
     .select()
     .from(notes)
-    .where(eq(notes.id, Number(id)))
+    .where(eq(notes.id, id))
     .get();
   if (!existing) {
-    autoPush(); return Response.json({ error: "Note not found" }, { status: 404 });
+    return Response.json({ error: "Note not found" }, { status: 404 });
   }
 
   const row = db
     .update(notes)
     .set(body)
-    .where(eq(notes.id, Number(id)))
+    .where(eq(notes.id, id))
     .returning()
     .get();
 
-  autoPush(); return Response.json(row);
+  getSyncService().debouncedPush();
+  return Response.json(row);
 }
 
 export async function DELETE(
@@ -39,12 +41,13 @@ export async function DELETE(
   const existing = db
     .select()
     .from(notes)
-    .where(eq(notes.id, Number(id)))
+    .where(eq(notes.id, id))
     .get();
   if (!existing) {
-    autoPush(); return Response.json({ error: "Note not found" }, { status: 404 });
+    return Response.json({ error: "Note not found" }, { status: 404 });
   }
 
-  db.delete(notes).where(eq(notes.id, Number(id))).run();
-  autoPush(); return Response.json({ deleted: true });
+  db.delete(notes).where(eq(notes.id, id)).run();
+  getSyncService().debouncedPush();
+  return Response.json({ deleted: true });
 }

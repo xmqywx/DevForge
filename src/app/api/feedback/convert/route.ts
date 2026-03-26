@@ -1,6 +1,7 @@
 import { db } from "@/db/client";
 import { feedback, issues } from "@/db/schema";
 import { eq, sql } from "drizzle-orm";
+import { getSyncService } from "../../../../../packages/sync";
 
 export const dynamic = "force-dynamic";
 
@@ -9,19 +10,19 @@ export async function POST(request: Request) {
   const { feedbackId } = body;
 
   if (!feedbackId) {
-    autoPush(); return Response.json({ error: "feedbackId is required" }, { status: 400 });
+    return Response.json({ error: "feedbackId is required" }, { status: 400 });
   }
 
   const fb = db
     .select()
     .from(feedback)
-    .where(eq(feedback.id, Number(feedbackId)))
+    .where(eq(feedback.id, feedbackId))
     .get();
   if (!fb) {
-    autoPush(); return Response.json({ error: "Feedback not found" }, { status: 404 });
+    return Response.json({ error: "Feedback not found" }, { status: 404 });
   }
   if (fb.isConverted) {
-    autoPush(); return Response.json({ error: "Feedback already converted" }, { status: 409 });
+    return Response.json({ error: "Feedback already converted" }, { status: 409 });
   }
 
   // Create issue from feedback
@@ -50,5 +51,6 @@ export async function POST(request: Request) {
 
   const updatedFb = db.select().from(feedback).where(eq(feedback.id, fb.id)).get();
 
-  autoPush(); return Response.json({ issue, feedback: updatedFb }, { status: 201 });
+  getSyncService().debouncedPush();
+  return Response.json({ issue, feedback: updatedFb }, { status: 201 });
 }

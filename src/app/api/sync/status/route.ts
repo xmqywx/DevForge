@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { db } from "@/db/client";
 import { projects, issues, notes, releases, milestones, feedback } from "@/db/schema";
 import { sql } from "drizzle-orm";
+import { getSyncService } from "../../../../../packages/sync";
 
 export const dynamic = "force-dynamic";
 
@@ -51,7 +52,11 @@ export async function GET() {
     serverOnline = false;
   }
 
+  // Merge SyncService status with local DB counts and server info
+  const syncStatus = getSyncService().status();
+
   return NextResponse.json({
+    ...syncStatus,
     serverOnline,
     serverUrl: SERVER_URL,
     localCounts,

@@ -15,7 +15,7 @@ export async function GET(request: NextRequest) {
   const project = db
     .select()
     .from(projects)
-    .where(eq(projects.id, Number(projectId)))
+    .where(eq(projects.id, projectId))
     .get();
 
   if (!project) {

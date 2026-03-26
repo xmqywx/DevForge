@@ -116,7 +116,7 @@ export function MilestoneEditor({
     setError("");
     try {
       const payload = {
-        projectId: Number(projectId),
+        projectId,
         title: title.trim(),
         description: description.trim(),
         date,
@@ -136,7 +136,7 @@ export function MilestoneEditor({
       if (!res.ok) throw new Error(await res.text());
       const saved: Milestone = await res.json();
       // Attach project name for display
-      const proj = projects.find((p) => p.id === Number(projectId));
+      const proj = projects.find((p) => p.id === projectId);
       onSaved({ ...saved, projectName: proj?.name });
     } catch (e) {
       setError(e instanceof Error ? e.message : "Failed to save.");

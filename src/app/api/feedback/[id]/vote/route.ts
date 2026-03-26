@@ -10,12 +10,11 @@ export async function POST(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params;
-  const feedbackId = Number(id);
 
   const existing = db
     .select()
     .from(feedback)
-    .where(eq(feedback.id, feedbackId))
+    .where(eq(feedback.id, id))
     .get();
   if (!existing) {
     return Response.json({ error: "Feedback not found" }, { status: 404 });
@@ -29,7 +28,7 @@ export async function POST(
   const alreadyVoted = db
     .select()
     .from(feedbackVotes)
-    .where(and(eq(feedbackVotes.feedbackId, feedbackId), eq(feedbackVotes.voterIp, ip)))
+    .where(and(eq(feedbackVotes.feedbackId, id), eq(feedbackVotes.voterIp, ip)))
     .get();
 
   if (alreadyVoted) {
@@ -37,12 +36,12 @@ export async function POST(
   }
 
   // Record vote and increment counter
-  db.insert(feedbackVotes).values({ feedbackId, voterIp: ip }).run();
+  db.insert(feedbackVotes).values({ feedbackId: id, voterIp: ip }).run();
   db.update(feedback)
     .set({ upvotes: sql`${feedback.upvotes} + 1` })
-    .where(eq(feedback.id, feedbackId))
+    .where(eq(feedback.id, id))
     .run();
 
-  const updated = db.select().from(feedback).where(eq(feedback.id, feedbackId)).get();
+  const updated = db.select().from(feedback).where(eq(feedback.id, id)).get();
   return Response.json(updated);
 }

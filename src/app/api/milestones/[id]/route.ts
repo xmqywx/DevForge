@@ -1,7 +1,7 @@
 import { db } from "@/db/client";
 import { milestones } from "@/db/schema";
 import { eq } from "drizzle-orm";
-import { syncProject } from "@/lib/auto-sync";
+import { getSyncService } from "../../../../../packages/sync";
 
 export const dynamic = "force-dynamic";
 
@@ -15,22 +15,22 @@ export async function PATCH(
   const existing = db
     .select()
     .from(milestones)
-    .where(eq(milestones.id, Number(id)))
+    .where(eq(milestones.id, id))
     .get();
   if (!existing) {
-    autoPush(); return Response.json({ error: "Milestone not found" }, { status: 404 });
+    return Response.json({ error: "Milestone not found" }, { status: 404 });
   }
 
   const row = db
     .update(milestones)
     .set(body)
-    .where(eq(milestones.id, Number(id)))
+    .where(eq(milestones.id, id))
     .returning()
     .get();
 
-  syncProject(existing.projectId);
+  getSyncService().pushProjectById(existing.projectId);
 
-  autoPush(); return Response.json(row);
+  return Response.json(row);
 }
 
 export async function DELETE(
@@ -42,13 +42,13 @@ export async function DELETE(
   const existing = db
     .select()
     .from(milestones)
-    .where(eq(milestones.id, Number(id)))
+    .where(eq(milestones.id, id))
     .get();
   if (!existing) {
-    autoPush(); return Response.json({ error: "Milestone not found" }, { status: 404 });
+    return Response.json({ error: "Milestone not found" }, { status: 404 });
   }
 
-  db.delete(milestones).where(eq(milestones.id, Number(id))).run();
-  syncProject(existing.projectId);
-  autoPush(); return Response.json({ deleted: true });
+  db.delete(milestones).where(eq(milestones.id, id)).run();
+  getSyncService().pushProjectById(existing.projectId);
+  return Response.json({ deleted: true });
 }

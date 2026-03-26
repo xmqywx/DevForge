@@ -14,7 +14,7 @@ export async function PATCH(
   const existing = db
     .select()
     .from(feedback)
-    .where(eq(feedback.id, Number(id)))
+    .where(eq(feedback.id, id))
     .get();
   if (!existing) {
     return Response.json({ error: "Feedback not found" }, { status: 404 });
@@ -23,7 +23,7 @@ export async function PATCH(
   const row = db
     .update(feedback)
     .set({ ...body, updatedAt: sql`datetime('now')` })
-    .where(eq(feedback.id, Number(id)))
+    .where(eq(feedback.id, id))
     .returning()
     .get();
 
@@ -39,12 +39,12 @@ export async function DELETE(
   const existing = db
     .select()
     .from(feedback)
-    .where(eq(feedback.id, Number(id)))
+    .where(eq(feedback.id, id))
     .get();
   if (!existing) {
     return Response.json({ error: "Feedback not found" }, { status: 404 });
   }
 
-  db.delete(feedback).where(eq(feedback.id, Number(id))).run();
+  db.delete(feedback).where(eq(feedback.id, id)).run();
   return Response.json({ deleted: true });
 }
