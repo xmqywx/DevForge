@@ -1,7 +1,7 @@
 import { db } from "@/db/client";
 import { issues } from "@/db/schema";
 import { eq, sql } from "drizzle-orm";
-import { syncProject } from "@/lib/auto-sync";
+import { getSyncService } from "../../../../../packages/sync";
 
 export const dynamic = "force-dynamic";
 
@@ -15,10 +15,10 @@ export async function PATCH(
   const existing = db
     .select()
     .from(issues)
-    .where(eq(issues.id, Number(id)))
+    .where(eq(issues.id, id))
     .get();
   if (!existing) {
-    autoPush(); return Response.json({ error: "Issue not found" }, { status: 404 });
+    return Response.json({ error: "Issue not found" }, { status: 404 });
   }
 
   // Auto-set resolvedAt when status changes to resolved
@@ -33,15 +33,15 @@ export async function PATCH(
   const row = db
     .update(issues)
     .set(updates)
-    .where(eq(issues.id, Number(id)))
+    .where(eq(issues.id, id))
     .returning()
     .get();
 
   if (row?.projectId) {
-    syncProject(row.projectId);
+    getSyncService().pushProjectById(row.projectId);
   }
 
-  autoPush(); return Response.json(row);
+  return Response.json(row);
 }
 
 export async function DELETE(
@@ -53,13 +53,13 @@ export async function DELETE(
   const existing = db
     .select()
     .from(issues)
-    .where(eq(issues.id, Number(id)))
+    .where(eq(issues.id, id))
     .get();
   if (!existing) {
-    autoPush(); return Response.json({ error: "Issue not found" }, { status: 404 });
+    return Response.json({ error: "Issue not found" }, { status: 404 });
   }
 
-  db.delete(issues).where(eq(issues.id, Number(id))).run();
-  syncProject(existing.projectId);
-  autoPush(); return Response.json({ deleted: true });
+  db.delete(issues).where(eq(issues.id, id)).run();
+  getSyncService().pushProjectById(existing.projectId);
+  return Response.json({ deleted: true });
 }

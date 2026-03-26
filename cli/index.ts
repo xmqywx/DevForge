@@ -5,6 +5,7 @@ import { projects, issues } from "../src/db/schema";
 import { eq, desc, sql, inArray } from "drizzle-orm";
 import { getOverviewStats } from "../src/lib/queries";
 import { seedFromScan } from "../src/db/seed";
+import { getSyncService } from "../packages/sync";
 
 const program = new Command();
 program.name("devforge").description("Personal Project Command Center").version("1.0.0");
@@ -46,6 +47,7 @@ issueCmd.command("add <project> <title>")
     const result = db.insert(issues).values({
       projectId: project.id, title, type: opts.type, priority: opts.priority, source: "manual",
     }).returning().get();
+    getSyncService().debouncedPush();
     console.log(`Issue #${result.id} created: ${title}`);
   });
 
@@ -67,7 +69,8 @@ issueCmd.command("close <id>")
   .description("Close an issue")
   .action((id: string) => {
     db.update(issues).set({ status: "resolved", resolvedAt: new Date().toISOString(), updatedAt: new Date().toISOString() })
-      .where(eq(issues.id, Number(id))).run();
+      .where(eq(issues.id, id)).run();
+    getSyncService().debouncedPush();
     console.log(`Issue #${id} resolved`);
   });
 
@@ -87,18 +90,50 @@ program.command("open")
     require("child_process").execSync("open http://localhost:3102");
   });
 
-// devforge sync [direction]
-program
-  .command("sync [direction]")
-  .description("Sync with server (push/pull/both)")
-  .action(async (direction?: string) => {
-    const { execSync } = require("child_process");
-    console.log(`Syncing (${direction ?? "both"})...`);
+// devforge sync push|pull|status|both
+const syncCmd = program.command("sync").description("Sync with server");
+
+syncCmd.command("push")
+  .description("Push local data to server")
+  .action(async () => {
+    console.log("Pushing to server...");
     try {
-      execSync(
-        `cd ${__dirname}/.. && node_modules/.bin/tsx scripts/sync.ts ${direction ?? "both"}`,
-        { encoding: "utf-8", stdio: "inherit", timeout: 30000 },
-      );
+      const result = await getSyncService().push();
+      if ((result as any).skipped) { console.log("Sync disabled or server URL not set"); return; }
+      console.log("Push complete:", JSON.stringify(result, null, 2));
+    } catch (error: any) {
+      console.error("Push failed:", error.message);
+    }
+  });
+
+syncCmd.command("pull")
+  .description("Pull data from server")
+  .action(async () => {
+    console.log("Pulling from server...");
+    try {
+      const result = await getSyncService().pull();
+      if ((result as any).skipped) { console.log("Sync disabled or server URL not set"); return; }
+      console.log("Pull complete:", JSON.stringify(result, null, 2));
+    } catch (error: any) {
+      console.error("Pull failed:", error.message);
+    }
+  });
+
+syncCmd.command("status")
+  .description("Show sync status")
+  .action(() => {
+    const status = getSyncService().status();
+    console.log(JSON.stringify(status, null, 2));
+  });
+
+// Legacy: devforge sync [both|push|pull] — keep for backwards compat
+syncCmd.command("both", { hidden: true })
+  .description("Push and pull (default)")
+  .action(async () => {
+    console.log("Syncing both directions...");
+    try {
+      const result = await getSyncService().sync();
+      console.log("Sync complete:", JSON.stringify(result, null, 2));
     } catch (error: any) {
       console.error("Sync failed:", error.message);
     }

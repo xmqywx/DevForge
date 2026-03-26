@@ -4,17 +4,7 @@ import { projects, issues, notes, gitSnapshots, releases, milestones } from "../
 import { eq, desc, sql, inArray, and } from "drizzle-orm";
 import { getNextActionableIssues, getBlockedIssues, getProjectWithGit, getOverviewStats } from "../src/lib/queries.js";
 import { seedFromScan } from "../src/db/seed.js";
-import { execSync } from "child_process";
-import { resolve } from "path";
-
-// Auto-sync to server after write operations (non-blocking)
-function autoSync() {
-  try {
-    const dir = resolve(__dirname, "..");
-    const { exec } = require("child_process");
-    exec(`bash ${dir}/hooks/post-sync.sh`, { timeout: 15000 });
-  } catch {}
-}
+import { getSyncService } from "../packages/sync/index.js";
 
 type ToolDef = {
   name: string;
@@ -124,7 +114,7 @@ export const TOOLS: ToolDef[] = [
       description: z.string().optional().describe("Issue description"),
       type: z.enum(["bug", "feature", "improvement", "question", "task", "note"]).optional().describe("Issue type"),
       priority: z.enum(["high", "medium", "low"]).optional().describe("Issue priority"),
-      depends_on: z.array(z.number()).optional().describe("Array of issue IDs this depends on"),
+      depends_on: z.array(z.string()).optional().describe("Array of issue IDs this depends on"),
     },
     handler: (args: {
       project_slug: string;
@@ -132,7 +122,7 @@ export const TOOLS: ToolDef[] = [
       description?: string;
       type?: string;
       priority?: string;
-      depends_on?: number[];
+      depends_on?: string[];
     }) => {
       const project = db
         .select()
@@ -154,7 +144,7 @@ export const TOOLS: ToolDef[] = [
         .returning()
         .get();
 
-      autoSync(); return { created: result };
+      getSyncService().debouncedPush(); return { created: result };
     },
   },
 
@@ -163,12 +153,12 @@ export const TOOLS: ToolDef[] = [
     name: "devforge_update_issue",
     description: "Update an issue's status, priority, or description. Auto-sets resolvedAt when status changes to resolved.",
     inputSchema: {
-      id: z.number().describe("Issue ID"),
+      id: z.string().describe("Issue ID (UUID)"),
       status: z.enum(["open", "in-progress", "resolved", "wont-fix", "deferred", "closed"]).optional().describe("New status"),
       priority: z.enum(["high", "medium", "low"]).optional().describe("New priority"),
       description: z.string().optional().describe("New description"),
     },
-    handler: (args: { id: number; status?: string; priority?: string; description?: string }) => {
+    handler: (args: { id: string; status?: string; priority?: string; description?: string }) => {
       const existing = db.select().from(issues).where(eq(issues.id, args.id)).get();
       if (!existing) return { error: `Issue #${args.id} not found` };
 
@@ -191,7 +181,7 @@ export const TOOLS: ToolDef[] = [
         .returning()
         .get();
 
-      autoSync(); return { updated: result };
+      getSyncService().debouncedPush(); return { updated: result };
     },
   },
 
@@ -224,7 +214,7 @@ export const TOOLS: ToolDef[] = [
         .returning()
         .get();
 
-      autoSync(); return { created: result };
+      getSyncService().debouncedPush(); return { created: result };
     },
   },
 
@@ -265,7 +255,7 @@ export const TOOLS: ToolDef[] = [
         .returning()
         .get();
 
-      autoSync(); return { updated: result };
+      getSyncService().debouncedPush(); return { updated: result };
     },
   },
 
@@ -321,7 +311,7 @@ export const TOOLS: ToolDef[] = [
         .returning()
         .get();
 
-      autoSync(); return { success: true, release: result };
+      getSyncService().debouncedPush(); return { success: true, release: result };
     },
   },
 
@@ -382,7 +372,7 @@ export const TOOLS: ToolDef[] = [
         .returning()
         .get();
 
-      autoSync(); return { success: true, milestone: result };
+      getSyncService().debouncedPush(); return { success: true, milestone: result };
     },
   },
 
@@ -421,7 +411,7 @@ export const TOOLS: ToolDef[] = [
         .where(eq(projects.id, project.id))
         .run();
 
-      autoSync(); return { success: true, length: readmeContent.length };
+      getSyncService().debouncedPush(); return { success: true, length: readmeContent.length };
     },
   },
 

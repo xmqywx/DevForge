@@ -2,7 +2,7 @@ import { db } from "@/db/client";
 import { projects, issues, notes } from "@/db/schema";
 import { eq, desc, sql } from "drizzle-orm";
 import { getProjectWithGit } from "@/lib/queries";
-import { syncProject } from "@/lib/auto-sync";
+import { getSyncService } from "../../../../../packages/sync";
 
 export const dynamic = "force-dynamic";
 
@@ -13,7 +13,7 @@ export async function GET(
   const { slug } = await params;
   const project = getProjectWithGit(slug);
   if (!project) {
-    autoPush(); return Response.json({ error: "Project not found" }, { status: 404 });
+    return Response.json({ error: "Project not found" }, { status: 404 });
   }
 
   const projectIssues = db
@@ -33,7 +33,7 @@ export async function GET(
     .orderBy(desc(notes.createdAt))
     .all();
 
-  autoPush(); return Response.json({ ...project, issues: projectIssues, notes: projectNotes });
+  return Response.json({ ...project, issues: projectIssues, notes: projectNotes });
 }
 
 export async function PATCH(
@@ -45,7 +45,7 @@ export async function PATCH(
 
   const existing = db.select().from(projects).where(eq(projects.slug, slug)).get();
   if (!existing) {
-    autoPush(); return Response.json({ error: "Project not found" }, { status: 404 });
+    return Response.json({ error: "Project not found" }, { status: 404 });
   }
 
   const row = db
@@ -56,8 +56,8 @@ export async function PATCH(
     .get();
 
   if (row?.isPublic) {
-    syncProject(row.id);
+    getSyncService().pushProjectById(row.id);
   }
 
-  autoPush(); return Response.json(row);
+  return Response.json(row);
 }
