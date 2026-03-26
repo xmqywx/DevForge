@@ -16,11 +16,11 @@ export async function GET(request: NextRequest) {
         .all()
     : query.orderBy(desc(notes.createdAt)).all();
 
-  return Response.json(rows);
+  autoPush(); return Response.json(rows);
 }
 
 export async function POST(request: Request) {
   const body = await request.json();
   const row = db.insert(notes).values(body).returning().get();
-  return Response.json(row, { status: 201 });
+  autoPush(); return Response.json(row, { status: 201 });
 }

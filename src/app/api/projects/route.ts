@@ -39,7 +39,7 @@ export async function GET(request: NextRequest) {
     openIssueCount: issueCountMap.get(r.id) ?? 0,
   }));
 
-  return Response.json(rowsWithCounts);
+  autoPush(); return Response.json(rowsWithCounts);
 }
 
 export async function POST(request: Request) {
@@ -48,5 +48,5 @@ export async function POST(request: Request) {
   if (row?.isPublic) {
     pushToServer({ projects: [row] });
   }
-  return Response.json(row, { status: 201 });
+  autoPush(); return Response.json(row, { status: 201 });
 }

@@ -34,7 +34,7 @@ export async function GET(request: NextRequest) {
           )
           .all();
 
-  return Response.json(rows);
+  autoPush(); return Response.json(rows);
 }
 
 export async function POST(request: Request) {
@@ -43,5 +43,5 @@ export async function POST(request: Request) {
   if (row?.projectId) {
     syncProject(row.projectId);
   }
-  return Response.json(row, { status: 201 });
+  autoPush(); return Response.json(row, { status: 201 });
 }

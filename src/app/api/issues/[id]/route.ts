@@ -18,7 +18,7 @@ export async function PATCH(
     .where(eq(issues.id, Number(id)))
     .get();
   if (!existing) {
-    return Response.json({ error: "Issue not found" }, { status: 404 });
+    autoPush(); return Response.json({ error: "Issue not found" }, { status: 404 });
   }
 
   // Auto-set resolvedAt when status changes to resolved
@@ -41,7 +41,7 @@ export async function PATCH(
     syncProject(row.projectId);
   }
 
-  return Response.json(row);
+  autoPush(); return Response.json(row);
 }
 
 export async function DELETE(
@@ -56,10 +56,10 @@ export async function DELETE(
     .where(eq(issues.id, Number(id)))
     .get();
   if (!existing) {
-    return Response.json({ error: "Issue not found" }, { status: 404 });
+    autoPush(); return Response.json({ error: "Issue not found" }, { status: 404 });
   }
 
   db.delete(issues).where(eq(issues.id, Number(id))).run();
   syncProject(existing.projectId);
-  return Response.json({ deleted: true });
+  autoPush(); return Response.json({ deleted: true });
 }

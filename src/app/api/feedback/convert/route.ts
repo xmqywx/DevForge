@@ -9,7 +9,7 @@ export async function POST(request: Request) {
   const { feedbackId } = body;
 
   if (!feedbackId) {
-    return Response.json({ error: "feedbackId is required" }, { status: 400 });
+    autoPush(); return Response.json({ error: "feedbackId is required" }, { status: 400 });
   }
 
   const fb = db
@@ -18,10 +18,10 @@ export async function POST(request: Request) {
     .where(eq(feedback.id, Number(feedbackId)))
     .get();
   if (!fb) {
-    return Response.json({ error: "Feedback not found" }, { status: 404 });
+    autoPush(); return Response.json({ error: "Feedback not found" }, { status: 404 });
   }
   if (fb.isConverted) {
-    return Response.json({ error: "Feedback already converted" }, { status: 409 });
+    autoPush(); return Response.json({ error: "Feedback already converted" }, { status: 409 });
   }
 
   // Create issue from feedback
@@ -50,5 +50,5 @@ export async function POST(request: Request) {
 
   const updatedFb = db.select().from(feedback).where(eq(feedback.id, fb.id)).get();
 
-  return Response.json({ issue, feedback: updatedFb }, { status: 201 });
+  autoPush(); return Response.json({ issue, feedback: updatedFb }, { status: 201 });
 }

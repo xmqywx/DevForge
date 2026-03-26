@@ -17,7 +17,7 @@ export async function PATCH(
     .where(eq(notes.id, Number(id)))
     .get();
   if (!existing) {
-    return Response.json({ error: "Note not found" }, { status: 404 });
+    autoPush(); return Response.json({ error: "Note not found" }, { status: 404 });
   }
 
   const row = db
@@ -27,7 +27,7 @@ export async function PATCH(
     .returning()
     .get();
 
-  return Response.json(row);
+  autoPush(); return Response.json(row);
 }
 
 export async function DELETE(
@@ -42,9 +42,9 @@ export async function DELETE(
     .where(eq(notes.id, Number(id)))
     .get();
   if (!existing) {
-    return Response.json({ error: "Note not found" }, { status: 404 });
+    autoPush(); return Response.json({ error: "Note not found" }, { status: 404 });
   }
 
   db.delete(notes).where(eq(notes.id, Number(id))).run();
-  return Response.json({ deleted: true });
+  autoPush(); return Response.json({ deleted: true });
 }

@@ -69,7 +69,7 @@ export async function GET(
     new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
   );
 
-  return Response.json(merged);
+  autoPush(); return Response.json(merged);
 }
 
 export async function POST(
@@ -82,7 +82,7 @@ export async function POST(
 
   const content: string = body.content?.trim() ?? "";
   if (!content) {
-    return Response.json({ error: "content is required" }, { status: 400 });
+    autoPush(); return Response.json({ error: "content is required" }, { status: 400 });
   }
 
   const authorName = body.author ?? "Owner";
@@ -122,5 +122,5 @@ export async function POST(
     // Fire-and-forget — local save already succeeded
   }
 
-  return Response.json(row, { status: 201 });
+  autoPush(); return Response.json(row, { status: 201 });
 }

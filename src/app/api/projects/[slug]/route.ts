@@ -13,7 +13,7 @@ export async function GET(
   const { slug } = await params;
   const project = getProjectWithGit(slug);
   if (!project) {
-    return Response.json({ error: "Project not found" }, { status: 404 });
+    autoPush(); return Response.json({ error: "Project not found" }, { status: 404 });
   }
 
   const projectIssues = db
@@ -33,7 +33,7 @@ export async function GET(
     .orderBy(desc(notes.createdAt))
     .all();
 
-  return Response.json({ ...project, issues: projectIssues, notes: projectNotes });
+  autoPush(); return Response.json({ ...project, issues: projectIssues, notes: projectNotes });
 }
 
 export async function PATCH(
@@ -45,7 +45,7 @@ export async function PATCH(
 
   const existing = db.select().from(projects).where(eq(projects.slug, slug)).get();
   if (!existing) {
-    return Response.json({ error: "Project not found" }, { status: 404 });
+    autoPush(); return Response.json({ error: "Project not found" }, { status: 404 });
   }
 
   const row = db
@@ -59,5 +59,5 @@ export async function PATCH(
     syncProject(row.id);
   }
 
-  return Response.json(row);
+  autoPush(); return Response.json(row);
 }
