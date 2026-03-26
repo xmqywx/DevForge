@@ -107,7 +107,7 @@ function IssueDrawer({
     setSaveMsg("");
   }, [issue.id]);
 
-  // Load comments when issue changes
+  // Load comments from local DB (synced from server via WS → auto-pull)
   useEffect(() => {
     setComments([]);
     setCommentText("");
@@ -119,6 +119,18 @@ function IssueDrawer({
       .finally(() => setCommentsLoading(false));
   }, [issue.id]);
 
+  // Reload comments when WS event triggers sync
+  useEffect(() => {
+    function handleWSEvent() {
+      fetch(`/api/issues/${issue.id}/comments`)
+        .then((r) => r.json())
+        .then((data) => setComments(Array.isArray(data) ? data : []))
+        .catch(() => {});
+    }
+    window.addEventListener("devforge-ws-event", handleWSEvent);
+    return () => window.removeEventListener("devforge-ws-event", handleWSEvent);
+  }, [issue.id]);
+
   async function sendComment() {
     if (!commentText.trim()) return;
     setCommentSending(true);
@@ -126,7 +138,7 @@ function IssueDrawer({
       await fetch(`/api/issues/${issue.id}/comments`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ content: commentText }),
+        body: JSON.stringify({ content: commentText, author_name: "Kris" }),
       });
       setCommentText("");
       const res = await fetch(`/api/issues/${issue.id}/comments`);
@@ -203,13 +215,26 @@ function IssueDrawer({
 
           {/* Description */}
           <div className="flex flex-col gap-1.5">
-            <Label>{t("issues.fieldDescription")}</Label>
-            <Textarea
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              rows={5}
-              placeholder={t("issues.addDetails")}
-            />
+            <div className="flex items-center justify-between">
+              <Label>{t("issues.fieldDescription")}</Label>
+              <button
+                type="button"
+                onClick={() => setEditingDesc(!editingDesc)}
+                className="text-xs text-blue-500 hover:underline"
+              >
+                {editingDesc ? "预览" : "编辑"}
+              </button>
+            </div>
+            {editingDesc ? (
+              <Textarea
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                rows={5}
+                placeholder={t("issues.addDetails")}
+              />
+            ) : (
+              <div className="text-sm text-gray-600 bg-gray-50 rounded-xl p-3 border border-gray-100 min-h-[60px] rendered-html" dangerouslySetInnerHTML={{ __html: fixImageUrls(description || "<span class='text-gray-400'>无描述</span>") }} />
+            )}
           </div>
 
           {/* Metadata row */}
