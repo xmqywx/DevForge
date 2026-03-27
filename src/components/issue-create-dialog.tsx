@@ -22,7 +22,7 @@ import {
 } from "@/components/ui/select";
 
 interface Project {
-  id: number;
+  id: string;
   name: string;
   slug: string;
 }
@@ -74,7 +74,7 @@ export function IssueCreateDialog({
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          projectId: Number(projectId),
+          projectId,
           title: title.trim(),
           description: description.trim() || null,
           type,

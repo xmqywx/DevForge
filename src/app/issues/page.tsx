@@ -18,8 +18,8 @@ const SERVER_URL =
     : "https://forge.wdao.chat";
 
 interface IssueComment {
-  id: number | string;
-  issueId: number;
+  id: string;
+  issueId: string;
   authorName: string;
   isOwner: boolean;
   content: string;
@@ -48,7 +48,7 @@ function fixImageUrls(html: string): string {
 }
 
 interface Project {
-  id: number;
+  id: string;
   name: string;
   slug: string;
 }
@@ -96,6 +96,7 @@ function IssueDrawer({
   const [commentSending, setCommentSending] = useState(false);
   const [commentsLoading, setCommentsLoading] = useState(false);
   const commentsEndRef = useRef<HTMLDivElement>(null);
+  const [editingDesc, setEditingDesc] = useState(false);
 
   // Reset when issue changes
   useEffect(() => {
@@ -107,7 +108,7 @@ function IssueDrawer({
     setSaveMsg("");
   }, [issue.id]);
 
-  // Load comments when issue changes
+  // Load comments from local DB (synced from server via WS → auto-pull)
   useEffect(() => {
     setComments([]);
     setCommentText("");
@@ -119,6 +120,18 @@ function IssueDrawer({
       .finally(() => setCommentsLoading(false));
   }, [issue.id]);
 
+  // Reload comments when WS event triggers sync
+  useEffect(() => {
+    function handleWSEvent() {
+      fetch(`/api/issues/${issue.id}/comments`)
+        .then((r) => r.json())
+        .then((data) => setComments(Array.isArray(data) ? data : []))
+        .catch(() => {});
+    }
+    window.addEventListener("devforge-ws-event", handleWSEvent);
+    return () => window.removeEventListener("devforge-ws-event", handleWSEvent);
+  }, [issue.id]);
+
   async function sendComment() {
     if (!commentText.trim()) return;
     setCommentSending(true);
@@ -126,7 +139,7 @@ function IssueDrawer({
       await fetch(`/api/issues/${issue.id}/comments`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ content: commentText }),
+        body: JSON.stringify({ content: commentText, author_name: "Kris" }),
       });
       setCommentText("");
       const res = await fetch(`/api/issues/${issue.id}/comments`);
@@ -203,13 +216,26 @@ function IssueDrawer({
 
           {/* Description */}
           <div className="flex flex-col gap-1.5">
-            <Label>{t("issues.fieldDescription")}</Label>
-            <Textarea
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-              rows={5}
-              placeholder={t("issues.addDetails")}
-            />
+            <div className="flex items-center justify-between">
+              <Label>{t("issues.fieldDescription")}</Label>
+              <button
+                type="button"
+                onClick={() => setEditingDesc(!editingDesc)}
+                className="text-xs text-blue-500 hover:underline"
+              >
+                {editingDesc ? "预览" : "编辑"}
+              </button>
+            </div>
+            {editingDesc ? (
+              <Textarea
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
+                rows={5}
+                placeholder={t("issues.addDetails")}
+              />
+            ) : (
+              <div className="text-sm text-gray-600 bg-gray-50 rounded-xl p-3 border border-gray-100 min-h-[60px] rendered-html" dangerouslySetInnerHTML={{ __html: fixImageUrls(description || "<span class='text-gray-400'>无描述</span>") }} />
+            )}
           </div>
 
           {/* Metadata row */}
@@ -365,6 +391,127 @@ function IssueDrawer({
   );
 }
 
+// Searchable project dropdown — supports both typing and clicking
+function ProjectCombobox({
+  projects,
+  value,
+  onChange,
+  placeholder,
+}: {
+  projects: Project[];
+  value: string;
+  onChange: (v: string) => void;
+  placeholder: string;
+}) {
+  const [open, setOpen] = useState(false);
+  const [query, setQuery] = useState("");
+  const wrapperRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  // Close on outside click
+  useEffect(() => {
+    const handler = (e: MouseEvent) => {
+      if (wrapperRef.current && !wrapperRef.current.contains(e.target as Node)) {
+        setOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, []);
+
+  const selectedName =
+    value === "all"
+      ? ""
+      : projects.find((p) => String(p.id) === value)?.name ?? "";
+
+  const filtered = projects.filter(
+    (p) =>
+      !query ||
+      p.name.toLowerCase().includes(query.toLowerCase()) ||
+      p.slug.toLowerCase().includes(query.toLowerCase())
+  );
+
+  return (
+    <div ref={wrapperRef} className="relative min-w-[180px]">
+      <div
+        className="flex items-center gap-2 bg-white rounded-full px-4 py-2 shadow-sm cursor-pointer"
+        onClick={() => {
+          setOpen(true);
+          setTimeout(() => inputRef.current?.focus(), 0);
+        }}
+      >
+        <input
+          ref={inputRef}
+          type="text"
+          value={open ? query : selectedName || placeholder}
+          onChange={(e) => {
+            setQuery(e.target.value);
+            if (!open) setOpen(true);
+          }}
+          onFocus={() => {
+            setOpen(true);
+            setQuery("");
+          }}
+          onKeyDown={(e) => {
+            if (e.key === "Escape") {
+              setOpen(false);
+              setQuery("");
+              inputRef.current?.blur();
+            }
+          }}
+          placeholder={placeholder}
+          className={`bg-transparent outline-none text-sm w-full ${
+            !open && !selectedName ? "text-[#1a1a1a]" : "text-[#1a1a1a]"
+          } ${!open && !selectedName ? "font-normal" : ""} placeholder:text-[#1a1a1a]`}
+        />
+        <LuSearch className="w-3.5 h-3.5 text-gray-400 shrink-0" />
+      </div>
+
+      {open && (
+        <div className="absolute top-full left-0 right-0 mt-1 bg-white rounded-2xl shadow-xl border border-gray-100 max-h-64 overflow-y-auto z-50">
+          {/* All projects option */}
+          <button
+            onClick={() => {
+              onChange("all");
+              setOpen(false);
+              setQuery("");
+            }}
+            className={`w-full text-left px-4 py-2.5 text-sm hover:bg-gray-50 transition-colors ${
+              value === "all" ? "text-[#1a1a1a] font-medium bg-[#c6e135]/20" : "text-gray-600"
+            }`}
+          >
+            {placeholder}
+          </button>
+
+          {filtered.length === 0 ? (
+            <div className="px-4 py-3 text-sm text-gray-400 text-center">
+              No matching projects
+            </div>
+          ) : (
+            filtered.map((p) => (
+              <button
+                key={p.id}
+                onClick={() => {
+                  onChange(String(p.id));
+                  setOpen(false);
+                  setQuery("");
+                }}
+                className={`w-full text-left px-4 py-2.5 text-sm hover:bg-gray-50 transition-colors ${
+                  String(p.id) === value
+                    ? "text-[#1a1a1a] font-medium bg-[#c6e135]/20"
+                    : "text-gray-600"
+                }`}
+              >
+                {p.name}
+              </button>
+            ))
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function IssuesPage() {
   const { t } = useI18n();
   const [issues, setIssues] = useState<KanbanIssue[]>([]);
@@ -411,7 +558,7 @@ export default function IssuesPage() {
   }, []);
 
   const handleStatusChange = useCallback(
-    async (issueId: number, newStatus: string) => {
+    async (issueId: string, newStatus: string) => {
       // Optimistic update
       setIssues((prev) =>
         prev.map((i) => (i.id === issueId ? { ...i, status: newStatus } : i))
@@ -467,7 +614,7 @@ export default function IssuesPage() {
   const filteredIssues = issues.filter((issue) => {
     if (
       filterProjectId !== "all" &&
-      issue.projectId !== Number(filterProjectId)
+      String(issue.projectId) !== filterProjectId
     )
       return false;
     if (filterPriority !== "all" && issue.priority !== filterPriority)
@@ -509,19 +656,13 @@ export default function IssuesPage() {
           />
         </div>
 
-        {/* Project filter */}
-        <select
+        {/* Project filter — searchable dropdown */}
+        <ProjectCombobox
+          projects={projects}
           value={filterProjectId}
-          onChange={(e) => setFilterProjectId(e.target.value)}
-          className="bg-white rounded-full px-4 py-2 shadow-sm text-sm text-[#1a1a1a] outline-none cursor-pointer"
-        >
-          <option value="all">{t("issues.allProjects")}</option>
-          {projects.map((p) => (
-            <option key={p.id} value={String(p.id)}>
-              {p.name}
-            </option>
-          ))}
-        </select>
+          onChange={setFilterProjectId}
+          placeholder={t("issues.allProjects")}
+        />
 
         {/* Priority pills */}
         <div className="flex items-center gap-1.5">

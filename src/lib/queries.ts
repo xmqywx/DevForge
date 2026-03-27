@@ -3,7 +3,7 @@ import { projects, issues, notes, gitSnapshots } from "@/db/schema";
 import { eq, desc, sql, and, inArray } from "drizzle-orm";
 
 /** Next actionable issues — no unresolved blocking dependencies (CCPM-style) */
-export function getNextActionableIssues(projectId: number, limit = 5) {
+export function getNextActionableIssues(projectId: string, limit = 5) {
   return db
     .select()
     .from(issues)
@@ -27,7 +27,7 @@ export function getNextActionableIssues(projectId: number, limit = 5) {
 }
 
 /** Blocked issues with the issue(s) that block them */
-export function getBlockedIssues(projectId: number) {
+export function getBlockedIssues(projectId: string) {
   return db.all(sql`
     SELECT i.*, blocked.id as blocking_id, blocked.title as blocking_title
     FROM issues i, json_each(i.depends_on) AS dep

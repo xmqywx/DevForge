@@ -10,7 +10,7 @@ const transporter = process.env.SMTP_HOST
   : null;
 
 export async function sendFeedbackNotification(
-  fb: { id: number; title: string; type: string; description: string; authorName: string | null },
+  fb: { id: string; title: string; type: string; description: string; authorName: string | null },
   projectName: string
 ) {
   if (!transporter || !process.env.NOTIFICATION_EMAIL) return;

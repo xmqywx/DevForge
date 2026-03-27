@@ -16,7 +16,7 @@ import { MilestoneEditor, type Milestone } from "@/components/milestone-editor";
 import { useI18n } from "@/lib/i18n";
 
 interface Project {
-  id: number;
+  id: string;
   name: string;
 }
 
@@ -148,7 +148,7 @@ export default function MilestonesPage() {
     closeEditor();
   }
 
-  function handleDeleted(id: number) {
+  function handleDeleted(id: string) {
     setMilestones((prev) => prev.filter((m) => m.id !== id));
     closeEditor();
   }
@@ -156,7 +156,7 @@ export default function MilestonesPage() {
   const filtered =
     filterProjectId === "all"
       ? milestones
-      : milestones.filter((m) => m.projectId === Number(filterProjectId));
+      : milestones.filter((m) => m.projectId === filterProjectId);
 
   const completed = filtered.filter((m) => m.status === "completed").length;
   const current = filtered.filter((m) => m.status === "current").length;
@@ -223,7 +223,7 @@ export default function MilestonesPage() {
         >
           <option value="all">{t("releases.allProjects")}</option>
           {projects.map((p) => (
-            <option key={p.id} value={String(p.id)}>
+            <option key={p.id} value={p.id}>
               {p.name}
             </option>
           ))}
@@ -320,7 +320,7 @@ export default function MilestonesPage() {
           milestone={editingMilestone}
           projects={projects}
           defaultProjectId={
-            filterProjectId !== "all" ? Number(filterProjectId) : undefined
+            filterProjectId !== "all" ? filterProjectId : undefined
           }
           onClose={closeEditor}
           onSaved={handleSaved}

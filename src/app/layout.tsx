@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import { TopNav } from "@/components/top-nav";
 import { FloatingActions } from "@/components/floating-actions";
+import { WSListener } from "@/components/ws-listener";
 import { I18nProvider } from "@/lib/i18n";
 import { ThemeProvider } from "@/lib/theme";
 import "./globals.css";
@@ -28,6 +29,7 @@ export default function RootLayout({
           <I18nProvider>
             <TopNav />
             <FloatingActions />
+            <WSListener />
             <main className="max-w-7xl mx-auto px-6 py-8">{children}</main>
           </I18nProvider>
         </ThemeProvider>

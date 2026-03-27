@@ -88,7 +88,7 @@ export default function FeedbackPage() {
           <h1 className="text-3xl font-bold text-[#1a1a1a]">{t("feedback.title")}</h1>
           {lastFetched && (
             <p className="text-xs text-gray-400 mt-1">
-              Last updated {lastFetched.toLocaleTimeString()}
+              {t("feedback.lastUpdated")} {lastFetched.toLocaleTimeString()}
             </p>
           )}
         </div>
@@ -117,11 +117,11 @@ export default function FeedbackPage() {
                 : "bg-white text-gray-500 hover:bg-gray-100 shadow-sm"
             }`}
           >
-            {opt === "all" ? t("feedback.all") : opt.replace(/-/g, " ")}
+            {opt === "all" ? t("feedback.all") : t(`feedback.status.${opt}`)}
           </button>
         ))}
         <span className="text-sm text-gray-400 ml-auto">
-          {filtered.length} item{filtered.length !== 1 ? "s" : ""}
+          {filtered.length} {t("feedback.items")}
         </span>
       </div>
 
@@ -133,7 +133,7 @@ export default function FeedbackPage() {
       ) : filtered.length === 0 ? (
         <p className="text-gray-400 text-center py-12">
           {filter !== "all"
-            ? `${t("feedback.noFeedback")} with status "${filter.replace(/-/g, " ")}"`
+            ? `${t("feedback.noFeedback")} with status "${t(`feedback.status.${filter}`)}"`
             : t("feedback.noFeedback")}
         </p>
       ) : (

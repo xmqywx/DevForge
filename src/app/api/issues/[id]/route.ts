@@ -1,9 +1,19 @@
 import { db } from "@/db/client";
-import { issues } from "@/db/schema";
+import { issues, projects } from "@/db/schema";
 import { eq, sql } from "drizzle-orm";
-import { syncProject } from "@/lib/auto-sync";
+import { getSyncService, notifyIssueChange } from "../../../../../packages/sync";
 
 export const dynamic = "force-dynamic";
+
+export async function GET(
+  _request: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const { id } = await params;
+  const issue = db.select().from(issues).where(eq(issues.id, id)).get();
+  if (!issue) return Response.json({ error: "Not found" }, { status: 404 });
+  return Response.json(issue);
+}
 
 export async function PATCH(
   request: Request,
@@ -15,7 +25,7 @@ export async function PATCH(
   const existing = db
     .select()
     .from(issues)
-    .where(eq(issues.id, Number(id)))
+    .where(eq(issues.id, id))
     .get();
   if (!existing) {
     return Response.json({ error: "Issue not found" }, { status: 404 });
@@ -33,12 +43,16 @@ export async function PATCH(
   const row = db
     .update(issues)
     .set(updates)
-    .where(eq(issues.id, Number(id)))
+    .where(eq(issues.id, id))
     .returning()
     .get();
 
   if (row?.projectId) {
-    syncProject(row.projectId);
+    getSyncService().pushProjectById(row.projectId);
+    if (body.status) {
+      const project = db.select().from(projects).where(eq(projects.id, row.projectId)).get();
+      notifyIssueChange(row.title, project?.slug ?? "", "状态变更", `${body.status}`);
+    }
   }
 
   return Response.json(row);
@@ -53,13 +67,13 @@ export async function DELETE(
   const existing = db
     .select()
     .from(issues)
-    .where(eq(issues.id, Number(id)))
+    .where(eq(issues.id, id))
     .get();
   if (!existing) {
     return Response.json({ error: "Issue not found" }, { status: 404 });
   }
 
-  db.delete(issues).where(eq(issues.id, Number(id))).run();
-  syncProject(existing.projectId);
+  db.delete(issues).where(eq(issues.id, id)).run();
+  getSyncService().pushProjectById(existing.projectId);
   return Response.json({ deleted: true });
 }

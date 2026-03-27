@@ -16,19 +16,18 @@ export async function GET(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params;
-  const issueId = Number(id);
 
   // Fetch local comments
   const localComments = db
     .select()
     .from(issueComments)
-    .where(eq(issueComments.issueId, issueId))
+    .where(eq(issueComments.issueId, id))
     .all();
 
   // Try fetching from server (best-effort)
   let serverComments: any[] = [];
   try {
-    const res = await fetch(`${SERVER_URL}/api/issues/${issueId}/comments`, {
+    const res = await fetch(`${SERVER_URL}/api/issues/${id}/comments`, {
       headers: { "x-sync-secret": SYNC_SECRET },
       signal: AbortSignal.timeout(5000),
     });
@@ -42,11 +41,11 @@ export async function GET(
 
   // Merge: server comments first, then local-only ones (avoid duplicates by id)
   // Server comments have their own IDs; prefix them with "s-" in the merged result
-  // so the UI can distinguish. Local comments use numeric ids.
+  // so the UI can distinguish. Local comments use string UUIDs.
   const merged = [
     ...serverComments.map((c: any) => ({
       id: `s-${c.id}`,
-      issueId: c.issueId ?? issueId,
+      issueId: c.issueId ?? id,
       authorName: c.authorName ?? c.author_name ?? "Anonymous",
       isOwner: c.isOwner ?? c.is_owner ?? false,
       content: c.content ?? "",
@@ -77,7 +76,6 @@ export async function POST(
   { params }: { params: Promise<{ id: string }> }
 ) {
   const { id } = await params;
-  const issueId = Number(id);
   const body = await request.json();
 
   const content: string = body.content?.trim() ?? "";
@@ -92,7 +90,7 @@ export async function POST(
   const row = db
     .insert(issueComments)
     .values({
-      issueId,
+      issueId: id,
       authorName,
       isOwner: true,
       content,
@@ -103,14 +101,14 @@ export async function POST(
 
   // Also POST to server (best-effort)
   try {
-    await fetch(`${SERVER_URL}/api/issues/${issueId}/comments`, {
+    await fetch(`${SERVER_URL}/api/issues/${id}/comments`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
         "x-owner-secret": OWNER_SECRET,
       },
       body: JSON.stringify({
-        issueId,
+        issueId: id,
         content,
         author: "Owner",
         authorName: "Owner",

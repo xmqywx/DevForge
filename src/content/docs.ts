@@ -1,6 +1,7 @@
 export interface DocSection {
   slug: string;
   title: string;
+  titleKey: string;
   content: string;
 }
 
@@ -8,6 +9,7 @@ export const DOC_SECTIONS: DocSection[] = [
   {
     slug: "getting-started",
     title: "Getting Started",
+    titleKey: "docs.gettingStarted",
     content: `
 <h1>Getting Started</h1>
 
@@ -52,6 +54,7 @@ bash scripts/register-mcp.sh</code></pre>
   {
     slug: "slash-commands",
     title: "Slash Commands",
+    titleKey: "docs.slashCommands",
     content: `
 <h1>Slash Commands</h1>
 
@@ -149,6 +152,7 @@ bash scripts/register-mcp.sh</code></pre>
   {
     slug: "mcp-tools",
     title: "MCP Tools",
+    titleKey: "docs.mcpTools",
     content: `
 <h1>MCP Tools</h1>
 
@@ -260,6 +264,7 @@ ToolSearch("devforge")
   {
     slug: "cli-commands",
     title: "CLI Commands",
+    titleKey: "docs.cliCommands",
     content: `
 <h1>CLI Commands</h1>
 
@@ -332,6 +337,7 @@ devforge sync pull      # Pull feedback from server</code></pre>
   {
     slug: "bash-scripts",
     title: "Bash Scripts",
+    titleKey: "docs.bashScripts",
     content: `
 <h1>Bash Scripts</h1>
 
@@ -378,6 +384,7 @@ npx tsx scripts/sync.ts push</code></pre>
   {
     slug: "sync-mechanism",
     title: "Sync Mechanism",
+    titleKey: "docs.syncMechanism",
     content: `
 <h1>Sync Mechanism</h1>
 
@@ -453,6 +460,7 @@ DEVFORGE_OWNER_SECRET=devforge-owner-2026</code></pre>
   {
     slug: "deploy-guide",
     title: "Deploy Guide",
+    titleKey: "docs.deployGuide",
     content: `
 <h1>Deploy Guide</h1>
 
@@ -545,6 +553,7 @@ UPLOAD_DIR=/data/devforge/uploads</code></pre>
   {
     slug: "troubleshooting",
     title: "Troubleshooting",
+    titleKey: "docs.troubleshooting",
     content: `
 <h1>Troubleshooting</h1>
 
@@ -628,6 +637,7 @@ bash scripts/register-mcp.sh</code></pre>
   {
     slug: "faq",
     title: "FAQ",
+    titleKey: "docs.faq",
     content: `
 <h1>Frequently Asked Questions</h1>
 

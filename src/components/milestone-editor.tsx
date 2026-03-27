@@ -16,8 +16,8 @@ import {
 import { useI18n } from "@/lib/i18n";
 
 export interface Milestone {
-  id: number;
-  projectId: number;
+  id: string;
+  projectId: string;
   title: string;
   description: string | null;
   status: "completed" | "current" | "planned";
@@ -28,17 +28,17 @@ export interface Milestone {
 }
 
 interface Project {
-  id: number;
+  id: string;
   name: string;
 }
 
 interface MilestoneEditorProps {
   milestone: Milestone | null; // null = create new
   projects: Project[];
-  defaultProjectId?: number;
+  defaultProjectId?: string;
   onClose: () => void;
   onSaved: (milestone: Milestone) => void;
-  onDeleted?: (id: number) => void;
+  onDeleted?: (id: string) => void;
 }
 
 const ICON_OPTIONS = [
@@ -67,7 +67,7 @@ export function MilestoneEditor({
   const isNew = !milestone;
 
   const [projectId, setProjectId] = useState<string>(
-    milestone ? String(milestone.projectId) : defaultProjectId ? String(defaultProjectId) : ""
+    milestone ? milestone.projectId : defaultProjectId ?? ""
   );
   const [title, setTitle] = useState(milestone?.title ?? "");
   const [description, setDescription] = useState(milestone?.description ?? "");
@@ -81,14 +81,14 @@ export function MilestoneEditor({
   // Sync form when milestone changes
   useEffect(() => {
     if (milestone) {
-      setProjectId(String(milestone.projectId));
+      setProjectId(milestone.projectId);
       setTitle(milestone.title);
       setDescription(milestone.description ?? "");
       setDate(milestone.date);
       setStatus(milestone.status);
       setIcon(milestone.icon ?? "milestone");
     } else {
-      setProjectId(defaultProjectId ? String(defaultProjectId) : projects[0] ? String(projects[0].id) : "");
+      setProjectId(defaultProjectId ?? (projects[0] ? projects[0].id : ""));
       setTitle("");
       setDescription("");
       setDate("");
@@ -116,7 +116,7 @@ export function MilestoneEditor({
     setError("");
     try {
       const payload = {
-        projectId: Number(projectId),
+        projectId,
         title: title.trim(),
         description: description.trim(),
         date,
@@ -136,7 +136,7 @@ export function MilestoneEditor({
       if (!res.ok) throw new Error(await res.text());
       const saved: Milestone = await res.json();
       // Attach project name for display
-      const proj = projects.find((p) => p.id === Number(projectId));
+      const proj = projects.find((p) => p.id === projectId);
       onSaved({ ...saved, projectName: proj?.name });
     } catch (e) {
       setError(e instanceof Error ? e.message : "Failed to save.");
@@ -196,7 +196,7 @@ export function MilestoneEditor({
               </SelectTrigger>
               <SelectContent>
                 {projects.map((p) => (
-                  <SelectItem key={p.id} value={String(p.id)}>
+                  <SelectItem key={p.id} value={p.id}>
                     {p.name}
                   </SelectItem>
                 ))}

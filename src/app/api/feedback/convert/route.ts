@@ -1,6 +1,7 @@
 import { db } from "@/db/client";
 import { feedback, issues } from "@/db/schema";
 import { eq, sql } from "drizzle-orm";
+import { getSyncService } from "../../../../../packages/sync";
 
 export const dynamic = "force-dynamic";
 
@@ -15,7 +16,7 @@ export async function POST(request: Request) {
   const fb = db
     .select()
     .from(feedback)
-    .where(eq(feedback.id, Number(feedbackId)))
+    .where(eq(feedback.id, feedbackId))
     .get();
   if (!fb) {
     return Response.json({ error: "Feedback not found" }, { status: 404 });
@@ -50,5 +51,6 @@ export async function POST(request: Request) {
 
   const updatedFb = db.select().from(feedback).where(eq(feedback.id, fb.id)).get();
 
+  getSyncService().debouncedPush();
   return Response.json({ issue, feedback: updatedFb }, { status: 201 });
 }

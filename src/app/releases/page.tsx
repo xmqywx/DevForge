@@ -14,14 +14,14 @@ import { ReleaseForm } from "@/components/release-form";
 import { useI18n } from "@/lib/i18n";
 
 interface Project {
-  id: number;
+  id: string;
   name: string;
   repoPath: string | null;
 }
 
 interface Release {
-  id: number;
-  projectId: number;
+  id: string;
+  projectId: string;
   version: string;
   title: string;
   content: string;
@@ -61,7 +61,7 @@ function ReleaseCard({
 }: {
   release: ReleaseWithProject;
   onEdit: (r: Release) => void;
-  onDelete: (id: number) => void;
+  onDelete: (id: string) => void;
 }) {
   const { t } = useI18n();
   const [expanded, setExpanded] = useState(false);
@@ -225,7 +225,7 @@ export default function ReleasesPage() {
     [projects]
   );
 
-  const handleDeleted = useCallback((id: number) => {
+  const handleDeleted = useCallback((id: string) => {
     setReleases((prev) => prev.filter((r) => r.id !== id));
   }, []);
 
@@ -241,7 +241,7 @@ export default function ReleasesPage() {
 
   // Filter
   const filtered = releases.filter((r) => {
-    if (filterProjectId !== "all" && r.projectId !== Number(filterProjectId))
+    if (filterProjectId !== "all" && String(r.projectId) !== filterProjectId)
       return false;
     if (
       searchQuery &&

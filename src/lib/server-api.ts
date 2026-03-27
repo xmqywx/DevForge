@@ -37,7 +37,7 @@ export async function serverUpload(file: File): Promise<string> {
  * Post a reply as the owner. Should be called from a server-side API route
  * so OWNER_SECRET is never exposed to the client.
  */
-export async function ownerReply(feedbackId: number, content: string) {
+export async function ownerReply(feedbackId: string, content: string) {
   const res = await fetch(`${SERVER_URL}/api/feedback/${feedbackId}/reply`, {
     method: "POST",
     headers: {

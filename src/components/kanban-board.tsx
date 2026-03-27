@@ -101,7 +101,7 @@ function DroppableColumn({
 interface KanbanBoardProps {
   issues: KanbanIssue[];
   onCardClick: (issue: KanbanIssue) => void;
-  onStatusChange: (issueId: number, newStatus: string) => Promise<void>;
+  onStatusChange: (issueId: string, newStatus: string) => Promise<void>;
 }
 
 export function KanbanBoard({
@@ -136,7 +136,7 @@ export function KanbanBoard({
       columnIssues["closed"].push(issue);
   }
 
-  function getColumnForIssue(issueId: number): string | null {
+  function getColumnForIssue(issueId: string): string | null {
     for (const [colId, colIssues] of Object.entries(columnIssues)) {
       if (colIssues.some((i) => i.id === issueId)) return colId;
     }
@@ -153,7 +153,7 @@ export function KanbanBoard({
     const { active, over } = event;
     if (!over) return;
 
-    const activeId = active.id as number;
+    const activeId = String(active.id);
     const overId = over.id;
 
     // Determine target column
@@ -164,7 +164,7 @@ export function KanbanBoard({
       targetColumnId = overId;
     } else {
       // Dropped on another card — find that card's column
-      const overIssueId = overId as number;
+      const overIssueId = String(overId);
       targetColumnId = getColumnForIssue(overIssueId);
     }
 

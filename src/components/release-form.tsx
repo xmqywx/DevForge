@@ -18,14 +18,14 @@ import {
 import { useI18n } from "@/lib/i18n";
 
 interface Project {
-  id: number;
+  id: string;
   name: string;
   repoPath: string | null;
 }
 
 interface Release {
-  id: number;
-  projectId: number;
+  id: string;
+  projectId: string;
   version: string;
   title: string;
   content: string;
@@ -66,6 +66,7 @@ export function ReleaseForm({
       Placeholder.configure({ placeholder: "Write changelog here…" }),
     ],
     content: release?.content ?? "",
+    immediatelyRender: false,
     editorProps: {
       attributes: {
         class:
@@ -117,7 +118,7 @@ export function ReleaseForm({
 
     const content = editor?.getHTML() ?? "";
     const payload = {
-      projectId: Number(projectId),
+      projectId,
       version: version.trim(),
       title: title.trim(),
       content,
