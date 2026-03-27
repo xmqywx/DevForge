@@ -1,7 +1,7 @@
 import { db } from "@/db/client";
-import { issues } from "@/db/schema";
+import { issues, projects } from "@/db/schema";
 import { eq, sql } from "drizzle-orm";
-import { getSyncService } from "../../../../../packages/sync";
+import { getSyncService, notifyIssueChange } from "../../../../../packages/sync";
 
 export const dynamic = "force-dynamic";
 
@@ -49,6 +49,10 @@ export async function PATCH(
 
   if (row?.projectId) {
     getSyncService().pushProjectById(row.projectId);
+    if (body.status) {
+      const project = db.select().from(projects).where(eq(projects.id, row.projectId)).get();
+      notifyIssueChange(row.title, project?.slug ?? "", "状态变更", `${body.status}`);
+    }
   }
 
   return Response.json(row);

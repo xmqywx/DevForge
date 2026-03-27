@@ -86,3 +86,4 @@ export { getConfig, saveConfig } from "./config";
 export { newId } from "./uuid";
 export { getSyncStatus } from "./status";
 export type { SyncConfig, SyncPayload, PushResult, PullResult, SyncStatus, SyncLogEntry } from "./types";
+export { notify, notifyNewFeedback, notifyFeedbackReply, notifyIssueChange, notifyNewRelease, notifySyncComplete } from "./notify";

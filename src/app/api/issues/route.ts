@@ -1,8 +1,8 @@
 import { type NextRequest } from "next/server";
 import { db } from "@/db/client";
-import { issues } from "@/db/schema";
+import { issues, projects } from "@/db/schema";
 import { eq, and, desc, sql } from "drizzle-orm";
-import { getSyncService } from "../../../../packages/sync";
+import { getSyncService, notifyIssueChange } from "../../../../packages/sync";
 
 export const dynamic = "force-dynamic";
 
@@ -42,6 +42,8 @@ export async function POST(request: Request) {
   const row = db.insert(issues).values(body).returning().get();
   if (row?.projectId) {
     getSyncService().pushProjectById(row.projectId);
+    const project = db.select().from(projects).where(eq(projects.id, row.projectId)).get();
+    notifyIssueChange(row.title, project?.slug ?? "", "创建", `优先级: ${row.priority}`);
   }
   return Response.json(row, { status: 201 });
 }
