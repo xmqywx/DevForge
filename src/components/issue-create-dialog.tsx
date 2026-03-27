@@ -22,7 +22,7 @@ import {
 } from "@/components/ui/select";
 
 interface Project {
-  id: number;
+  id: string;
   name: string;
   slug: string;
 }

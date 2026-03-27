@@ -18,8 +18,8 @@ const SERVER_URL =
     : "https://forge.wdao.chat";
 
 interface IssueComment {
-  id: number | string;
-  issueId: number;
+  id: string;
+  issueId: string;
   authorName: string;
   isOwner: boolean;
   content: string;
@@ -48,7 +48,7 @@ function fixImageUrls(html: string): string {
 }
 
 interface Project {
-  id: number;
+  id: string;
   name: string;
   slug: string;
 }
@@ -558,7 +558,7 @@ export default function IssuesPage() {
   }, []);
 
   const handleStatusChange = useCallback(
-    async (issueId: number, newStatus: string) => {
+    async (issueId: string, newStatus: string) => {
       // Optimistic update
       setIssues((prev) =>
         prev.map((i) => (i.id === issueId ? { ...i, status: newStatus } : i))

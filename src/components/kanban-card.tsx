@@ -6,16 +6,16 @@ import { LuGripVertical } from "react-icons/lu";
 import { useI18n } from "@/lib/i18n";
 
 export interface KanbanIssue {
-  id: number;
-  projectId: number;
+  id: string;
+  projectId: string;
   title: string;
   description: string | null;
   type: string;
   status: string;
   priority: string;
   source: string;
-  feedbackId: number | null;
-  dependsOn: number[] | null;
+  feedbackId: string | null;
+  dependsOn: string[] | null;
   createdAt: string;
   updatedAt: string;
   resolvedAt: string | null;

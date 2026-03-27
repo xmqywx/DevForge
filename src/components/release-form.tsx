@@ -18,14 +18,14 @@ import {
 import { useI18n } from "@/lib/i18n";
 
 interface Project {
-  id: number;
+  id: string;
   name: string;
   repoPath: string | null;
 }
 
 interface Release {
-  id: number;
-  projectId: number;
+  id: string;
+  projectId: string;
   version: string;
   title: string;
   content: string;
