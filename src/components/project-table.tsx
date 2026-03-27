@@ -278,7 +278,7 @@ function InlinePublicToggle({
     const next = !value;
     setSaving(true);
     try {
-      await patchProject(slug, { is_public: next });
+      await patchProject(slug, { isPublic: next });
       onChange(slug, next);
     } finally {
       setSaving(false);
@@ -547,7 +547,7 @@ export function ProjectTable({ initialProjects }: ProjectTableProps) {
 
   async function batchSetPublic(isPublic: boolean) {
     await Promise.all(
-      selectedProjects.map((p) => patchProject(p.slug, { is_public: isPublic }))
+      selectedProjects.map((p) => patchProject(p.slug, { isPublic }))
     );
     setProjects((prev) =>
       prev.map((p) => (selected.has(p.id) ? { ...p, isPublic } : p))
