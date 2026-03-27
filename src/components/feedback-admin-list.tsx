@@ -19,8 +19,8 @@ const SERVER_URL =
   process.env.NEXT_PUBLIC_DEVFORGE_SERVER_URL ?? "https://forge.wdao.chat";
 
 export interface FeedbackItem {
-  id: number;
-  projectId: number;
+  id: string;
+  projectId: string;
   authorName: string | null;
   title: string;
   description: string | null;
@@ -28,7 +28,7 @@ export interface FeedbackItem {
   status: string | null;
   upvotes: number | null;
   isConverted: boolean | null;
-  issueId: number | null;
+  issueId: string | null;
   images?: string[] | null;
   createdAt: string | null;
   updatedAt: string | null;
@@ -102,10 +102,10 @@ interface Props {
 
 export function FeedbackAdminList({ items, onItemsChange }: Props) {
   const { t } = useI18n();
-  const [busy, setBusy] = useState<Record<number, boolean>>({});
+  const [busy, setBusy] = useState<Record<string, boolean>>({});
   const [replyTarget, setReplyTarget] = useState<FeedbackItem | null>(null);
 
-  const updateStatus = async (id: number, status: string) => {
+  const updateStatus = async (id: string, status: string) => {
     setBusy((b) => ({ ...b, [id]: true }));
     try {
       await fetch(`/api/feedback/${id}`, {
@@ -123,7 +123,7 @@ export function FeedbackAdminList({ items, onItemsChange }: Props) {
     }
   };
 
-  const convertToIssue = async (id: number) => {
+  const convertToIssue = async (id: string) => {
     setBusy((b) => ({ ...b, [id]: true }));
     try {
       const res = await fetch("/api/feedback/convert", {
