@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { DocSection } from "@/content/docs";
+import { useI18n } from "@/lib/i18n";
 
 interface DocsSidebarProps {
   sections: DocSection[];
@@ -10,6 +11,7 @@ interface DocsSidebarProps {
 }
 
 export function DocsSidebar({ sections, activeSlug }: DocsSidebarProps) {
+  const { t } = useI18n();
   const [query, setQuery] = useState("");
 
   const filtered = query.trim()
@@ -50,7 +52,7 @@ export function DocsSidebar({ sections, activeSlug }: DocsSidebarProps) {
                     : "text-gray-600 hover:bg-[#f0f0e8] hover:text-[#1a1a1a]"
                 }`}
               >
-                {section.title}
+                {t(section.titleKey)}
               </Link>
             );
           })

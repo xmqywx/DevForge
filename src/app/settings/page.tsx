@@ -136,17 +136,16 @@ function ScanTab() {
 
   return (
     <div className="space-y-6">
-      <SectionTitle>Git Scanner</SectionTitle>
+      <SectionTitle>{t("settings.gitScanner")}</SectionTitle>
       <InfoNote>
-        Scan paths and exclude directories are configured in <code className="font-mono text-xs">.env.local</code>.
-        They cannot be changed at runtime.
+        {t("settings.scanPathsInfo")}
       </InfoNote>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <ReadOnlyField label="Scan Path" value="~/Documents" />
-        <ReadOnlyField label="Exclude Dirs" value="node_modules, .git, dist, build, .next" />
-        <ReadOnlyField label="Scan Frequency" value="Manual (on demand)" />
-        <ReadOnlyField label="DB Path" value="~/.devforge/devforge.db" />
+        <ReadOnlyField label={t("settings.scanPath")} value="~/Documents" />
+        <ReadOnlyField label={t("settings.excludeDirs")} value="node_modules, .git, dist, build, .next" />
+        <ReadOnlyField label={t("settings.scanFrequency")} value={t("settings.manualOnDemand")} />
+        <ReadOnlyField label={t("settings.dbPath")} value="~/.devforge/devforge.db" />
       </div>
 
       <div className="flex items-center gap-4 pt-2">
@@ -280,12 +279,12 @@ function SyncTab() {
 
 // ── Tab 3: Automation ─────────────────────────────────────────────────────────
 
-const AUTO_COLS: { key: keyof Omit<ProjectRow, "id" | "name" | "slug">; label: string }[] = [
-  { key: "autoRecordIssues", label: "Record Issues" },
-  { key: "autoRecordNotes", label: "Record Notes" },
-  { key: "autoSessionSummary", label: "Session Summary" },
-  { key: "autoLoadContext", label: "Load Context" },
-  { key: "autoUpdateProgress", label: "Update Progress" },
+const AUTO_COLS: { key: keyof Omit<ProjectRow, "id" | "name" | "slug">; labelKey: string }[] = [
+  { key: "autoRecordIssues", labelKey: "settings.recordIssues" },
+  { key: "autoRecordNotes", labelKey: "settings.recordNotes" },
+  { key: "autoSessionSummary", labelKey: "settings.sessionSummary" },
+  { key: "autoLoadContext", labelKey: "settings.loadContext" },
+  { key: "autoUpdateProgress", labelKey: "settings.updateProgress" },
 ];
 
 function AutoValueBadge({ value }: { value: AutoValue }) {
@@ -302,14 +301,15 @@ function AutoValueBadge({ value }: { value: AutoValue }) {
 }
 
 const GLOBAL_DEFAULTS: Record<string, AutoValue> = {
-  "Record Issues": "on",
-  "Record Notes": "on",
-  "Session Summary": "on",
-  "Load Context": "on",
-  "Update Progress": "off",
+  "settings.recordIssues": "on",
+  "settings.recordNotes": "on",
+  "settings.sessionSummary": "on",
+  "settings.loadContext": "on",
+  "settings.updateProgress": "off",
 };
 
 function AutomationTab() {
+  const { t } = useI18n();
   const [projects, setProjects] = useState<ProjectRow[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -323,14 +323,14 @@ function AutomationTab() {
 
   return (
     <div className="space-y-6">
-      <SectionTitle>Automation Settings</SectionTitle>
+      <SectionTitle>{t("settings.automationTitle")}</SectionTitle>
 
       <div>
-        <h4 className="text-sm font-semibold text-gray-700 mb-3">Global Defaults</h4>
+        <h4 className="text-sm font-semibold text-gray-700 mb-3">{t("settings.globalDefaults")}</h4>
         <div className="flex flex-wrap gap-3">
-          {Object.entries(GLOBAL_DEFAULTS).map(([label, value]) => (
-            <div key={label} className="flex items-center gap-2 bg-gray-50 border border-gray-200 rounded-xl px-3 py-2">
-              <span className="text-xs text-gray-500">{label}</span>
+          {Object.entries(GLOBAL_DEFAULTS).map(([labelKey, value]) => (
+            <div key={labelKey} className="flex items-center gap-2 bg-gray-50 border border-gray-200 rounded-xl px-3 py-2">
+              <span className="text-xs text-gray-500">{t(labelKey)}</span>
               <AutoValueBadge value={value} />
             </div>
           ))}
@@ -338,21 +338,21 @@ function AutomationTab() {
       </div>
 
       <div>
-        <h4 className="text-sm font-semibold text-gray-700 mb-3">Per-Project Overrides</h4>
+        <h4 className="text-sm font-semibold text-gray-700 mb-3">{t("settings.perProjectOverrides")}</h4>
         {loading ? (
           <div className="flex items-center gap-2 text-sm text-gray-400 py-4">
             <LuLoader className="w-4 h-4 animate-spin" />
-            Loading projects...
+            {t("common.loading")}
           </div>
         ) : (
           <div className="overflow-x-auto rounded-2xl border border-gray-200">
             <table className="w-full text-sm">
               <thead>
                 <tr className="bg-gray-50 border-b border-gray-200">
-                  <th className="text-left px-4 py-3 font-medium text-gray-600 whitespace-nowrap">Project</th>
+                  <th className="text-left px-4 py-3 font-medium text-gray-600 whitespace-nowrap">{t("projects.colName")}</th>
                   {AUTO_COLS.map((col) => (
                     <th key={col.key} className="text-center px-3 py-3 font-medium text-gray-600 whitespace-nowrap">
-                      {col.label}
+                      {t(col.labelKey)}
                     </th>
                   ))}
                 </tr>
