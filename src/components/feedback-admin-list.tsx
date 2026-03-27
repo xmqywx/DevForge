@@ -13,6 +13,7 @@ import {
   LuReply,
 } from "react-icons/lu";
 import { FeedbackReplyDrawer } from "./feedback-reply-drawer";
+import { FeedbackDetailDrawer } from "./feedback-detail-drawer";
 import { useI18n } from "@/lib/i18n";
 
 const SERVER_URL =
@@ -104,6 +105,7 @@ export function FeedbackAdminList({ items, onItemsChange }: Props) {
   const { t } = useI18n();
   const [busy, setBusy] = useState<Record<string, boolean>>({});
   const [replyTarget, setReplyTarget] = useState<FeedbackItem | null>(null);
+  const [detailTarget, setDetailTarget] = useState<FeedbackItem | null>(null);
 
   const updateStatus = async (id: string, status: string) => {
     setBusy((b) => ({ ...b, [id]: true }));
@@ -196,7 +198,11 @@ export function FeedbackAdminList({ items, onItemsChange }: Props) {
                         </span>
                       )}
                     </div>
-                    <h3 className="font-semibold text-[#1a1a1a] text-base">
+                    <h3
+                      className="font-semibold text-[#1a1a1a] text-base cursor-pointer hover:text-[#6b7c00] hover:underline transition-colors"
+                      onClick={() => setDetailTarget(item)}
+                      title={t("feedback.viewDetail")}
+                    >
                       {item.title}
                     </h3>
                     {item.description && (
@@ -314,6 +320,14 @@ export function FeedbackAdminList({ items, onItemsChange }: Props) {
         <FeedbackReplyDrawer
           feedback={replyTarget}
           onClose={() => setReplyTarget(null)}
+        />
+      )}
+
+      {/* Detail drawer */}
+      {detailTarget && (
+        <FeedbackDetailDrawer
+          feedback={detailTarget}
+          onClose={() => setDetailTarget(null)}
         />
       )}
     </>
