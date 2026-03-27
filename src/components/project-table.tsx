@@ -19,7 +19,6 @@ import {
   DialogTitle,
   DialogFooter,
 } from "@/components/ui/dialog";
-import { StageBadge } from "@/components/stage-badge";
 import {
   ChevronUpIcon,
   ChevronDownIcon,
@@ -35,7 +34,7 @@ const STAGES = ["idea", "dev", "beta", "live", "paused", "archived"] as const;
 type Stage = (typeof STAGES)[number];
 
 export interface ProjectRow {
-  id: number;
+  id: string;
   slug: string;
   name: string;
   description: string | null;
@@ -190,9 +189,11 @@ function InlineStageSelect({
   value: Stage;
   onChange: (slug: string, stage: Stage) => void;
 }) {
+  const { t } = useI18n();
   const [saving, setSaving] = useState(false);
 
-  async function handleChange(newStage: Stage | null) {
+  async function handleChange(e: React.ChangeEvent<HTMLSelectElement>) {
+    const newStage = e.target.value as Stage;
     if (!newStage) return;
     setSaving(true);
     try {
@@ -204,20 +205,18 @@ function InlineStageSelect({
   }
 
   return (
-    <Select value={value} onValueChange={handleChange} disabled={saving}>
-      <SelectTrigger className="w-28 h-7 text-xs border-transparent bg-transparent hover:bg-gray-100 focus-visible:border-gray-300">
-        <SelectValue>
-          <StageBadge stage={value} />
-        </SelectValue>
-      </SelectTrigger>
-      <SelectContent>
-        {STAGES.map((s) => (
-          <SelectItem key={s} value={s}>
-            <StageBadge stage={s} />
-          </SelectItem>
-        ))}
-      </SelectContent>
-    </Select>
+    <select
+      value={value}
+      onChange={handleChange}
+      disabled={saving}
+      className="h-7 px-2 rounded-lg border border-transparent bg-transparent hover:bg-gray-100 text-xs outline-none focus:border-gray-300 disabled:opacity-50 cursor-pointer"
+    >
+      {STAGES.map((s) => (
+        <option key={s} value={s}>
+          {t(`stage.${s}`)}
+        </option>
+      ))}
+    </select>
   );
 }
 
@@ -365,18 +364,16 @@ function BatchActionsBar({
       <div className="h-4 w-px bg-gray-300" />
       <div className="flex items-center gap-2">
         <span className="text-xs text-gray-500">{t("projects.fieldStage")}:</span>
-        <Select onValueChange={(v) => { if (v) onChangeStage(v as Stage); }}>
-          <SelectTrigger className="h-7 w-28 text-xs">
-            <SelectValue placeholder={t("projects.change")} />
-          </SelectTrigger>
-          <SelectContent>
-            {STAGES.map((s) => (
-              <SelectItem key={s} value={s}>
-                {t(`stage.${s}`)}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <select
+          onChange={(e) => { if (e.target.value) onChangeStage(e.target.value as Stage); }}
+          className="h-7 px-2 rounded-lg border border-gray-300 text-xs bg-white outline-none cursor-pointer"
+          defaultValue=""
+        >
+          <option value="" disabled>{t("projects.change")}</option>
+          {STAGES.map((s) => (
+            <option key={s} value={s}>{t(`stage.${s}`)}</option>
+          ))}
+        </select>
       </div>
       <Button
         size="xs"
@@ -425,7 +422,7 @@ export function ProjectTable({ initialProjects }: ProjectTableProps) {
   const [stageFilter, setStageFilter] = useState<Stage | "all">("all");
   const [sortKey, setSortKey] = useState<SortKey>("updatedAt");
   const [sortDir, setSortDir] = useState<SortDir>("desc");
-  const [selected, setSelected] = useState<Set<number>>(new Set());
+  const [selected, setSelected] = useState<Set<string>>(new Set());
   const [showNewDialog, setShowNewDialog] = useState(false);
 
   // Listen for floating-action events
@@ -526,7 +523,7 @@ export function ProjectTable({ initialProjects }: ProjectTableProps) {
     }
   }
 
-  function toggleOne(id: number) {
+  function toggleOne(id: string) {
     setSelected((s) => {
       const next = new Set(s);
       if (next.has(id)) next.delete(id);
