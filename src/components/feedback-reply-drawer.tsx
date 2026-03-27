@@ -84,7 +84,7 @@ export function FeedbackReplyDrawer({ feedback, onClose }: Props) {
       try {
         const form = new FormData();
         form.append("files", file);
-        const res = await fetch(`${SERVER_URL}/api/upload`, {
+        const res = await fetch("/api/upload-proxy", {
           method: "POST",
           body: form,
         });
