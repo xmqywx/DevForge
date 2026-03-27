@@ -24,7 +24,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={inter.variable}>
-      <body className="min-h-screen antialiased font-sans" style={{ backgroundColor: "var(--bg-page)", color: "var(--text-primary)" }}>
+      <body suppressHydrationWarning className="min-h-screen antialiased font-sans" style={{ backgroundColor: "var(--bg-page)", color: "var(--text-primary)" }}>
         <ThemeProvider>
           <I18nProvider>
             <TopNav />

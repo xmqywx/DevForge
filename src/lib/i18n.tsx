@@ -18,15 +18,17 @@ interface I18nContextType {
 const I18nContext = createContext<I18nContextType>({
   locale: "en",
   setLocale: () => {},
-  t: (k) => k,
+  t: (k) => dicts.en[k] ?? k,
 });
 
 export function I18nProvider({ children }: { children: ReactNode }) {
   const [locale, setLocaleState] = useState<Locale>("en");
+  const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
     const saved = localStorage.getItem("devforge:locale") as Locale | null;
     if (saved && (saved === "en" || saved === "zh")) setLocaleState(saved);
+    setMounted(true);
   }, []);
 
   const setLocale = (l: Locale) => {
