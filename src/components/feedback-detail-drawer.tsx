@@ -119,7 +119,6 @@ export function FeedbackDetailDrawer({ feedback, onClose }: Props) {
     } finally {
       setLoading(false);
     }
-    setLoading(false);
   }, [feedback.id]);
 
   useEffect(() => {
@@ -202,9 +201,16 @@ export function FeedbackDetailDrawer({ feedback, onClose }: Props) {
         const data = await res.json().catch(() => ({}));
         throw new Error(data.error ?? "Failed to send reply");
       }
+      const newReply = await res.json().catch(() => null);
+      // Optimistic append — no full reload
+      if (newReply) {
+        setReplies((prev) => [...prev, newReply as FeedbackReply]);
+      } else {
+        // Fallback: re-fetch if we can't parse the reply
+        await fetchReplies();
+      }
       setSendSuccess(true);
       editor.commands.clearContent();
-      await fetchReplies();
       setTimeout(() => setSendSuccess(false), 2000);
     } catch (e) {
       setError(e instanceof Error ? e.message : "Failed to send reply");
@@ -422,7 +428,8 @@ export function FeedbackDetailDrawer({ feedback, onClose }: Props) {
               <EditorContent editor={editor} />
             </div>
             <button
-              onClick={handleSend}
+              type="button"
+              onClick={(e) => { e.preventDefault(); handleSend(); }}
               disabled={sending || sendSuccess}
               className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-full text-sm font-medium bg-[#c6e135] text-[#1a1a1a] hover:opacity-90 transition-opacity disabled:opacity-50 shrink-0 self-end mb-0.5"
             >
