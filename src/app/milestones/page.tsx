@@ -100,6 +100,16 @@ export default function MilestonesPage() {
   const [editorOpen, setEditorOpen] = useState(false);
   const [editingMilestone, setEditingMilestone] = useState<Milestone | null>(null);
 
+  // Listen for floating-action events
+  useEffect(() => {
+    const handleCreate = () => {
+      setEditingMilestone(null);
+      setEditorOpen(true);
+    };
+    window.addEventListener("devforge:create-milestone", handleCreate);
+    return () => window.removeEventListener("devforge:create-milestone", handleCreate);
+  }, []);
+
   useEffect(() => {
     async function load() {
       setLoading(true);

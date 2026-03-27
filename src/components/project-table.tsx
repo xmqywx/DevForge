@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useCallback } from "react";
+import { useState, useMemo, useCallback, useEffect } from "react";
 import Link from "next/link";
 import { useI18n } from "@/lib/i18n";
 import { Button } from "@/components/ui/button";
@@ -427,6 +427,13 @@ export function ProjectTable({ initialProjects }: ProjectTableProps) {
   const [sortDir, setSortDir] = useState<SortDir>("desc");
   const [selected, setSelected] = useState<Set<number>>(new Set());
   const [showNewDialog, setShowNewDialog] = useState(false);
+
+  // Listen for floating-action events
+  useEffect(() => {
+    const handleCreate = () => setShowNewDialog(true);
+    window.addEventListener("devforge:create-project", handleCreate);
+    return () => window.removeEventListener("devforge:create-project", handleCreate);
+  }, []);
 
   // Filter + sort
   const visible = useMemo(() => {
