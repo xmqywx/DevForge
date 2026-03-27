@@ -614,7 +614,7 @@ export default function IssuesPage() {
   const filteredIssues = issues.filter((issue) => {
     if (
       filterProjectId !== "all" &&
-      issue.projectId !== filterProjectId
+      String(issue.projectId) !== filterProjectId
     )
       return false;
     if (filterPriority !== "all" && issue.priority !== filterPriority)

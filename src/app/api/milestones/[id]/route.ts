@@ -5,6 +5,16 @@ import { getSyncService } from "../../../../../packages/sync";
 
 export const dynamic = "force-dynamic";
 
+export async function GET(
+  _request: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const { id } = await params;
+  const milestone = db.select().from(milestones).where(eq(milestones.id, id)).get();
+  if (!milestone) return Response.json({ error: "Not found" }, { status: 404 });
+  return Response.json(milestone);
+}
+
 export async function PATCH(
   request: Request,
   { params }: { params: Promise<{ id: string }> }

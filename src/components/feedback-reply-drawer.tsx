@@ -65,6 +65,7 @@ export function FeedbackReplyDrawer({ feedback, onClose }: Props) {
       StarterKit,
       Placeholder.configure({ placeholder: "Write your reply…" }),
     ],
+    immediatelyRender: false,
     editorProps: {
       attributes: {
         class: "prose prose-sm max-w-none focus:outline-none p-3 min-h-[120px]",

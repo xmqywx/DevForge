@@ -60,7 +60,7 @@ interface ProjectEditFormProps {
 
 // ─── Tiptap Toolbar ──────────────────────────────────────────────────────────
 
-function TiptapToolbar({ editor }: { editor: ReturnType<typeof useEditor> }) {
+function TiptapToolbar({ editor }: { editor: ReturnType<typeof useEditor> | null }) {
   if (!editor) return null;
 
   const btnClass = (active: boolean) =>
@@ -191,6 +191,7 @@ function TiptapEditor({
       Placeholder.configure({ placeholder: placeholder ?? "Write something…" }),
     ],
     content: value,
+    immediatelyRender: false,
     onUpdate({ editor }) {
       onChange(editor.getHTML());
     },

@@ -66,6 +66,7 @@ export function ReleaseForm({
       Placeholder.configure({ placeholder: "Write changelog here…" }),
     ],
     content: release?.content ?? "",
+    immediatelyRender: false,
     editorProps: {
       attributes: {
         class:
