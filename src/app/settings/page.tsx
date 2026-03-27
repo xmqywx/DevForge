@@ -128,7 +128,7 @@ function ScanTab() {
       const data = await res.json() as { total: number; created: number; updated: number };
       setResult(`Scanned: ${data.total} repos, ${data.created} new, ${data.updated} updated`);
     } catch {
-      setResult("Scan failed");
+      setResult(t("settings.scanFailed"));
     } finally {
       setScanning(false);
     }
@@ -150,7 +150,7 @@ function ScanTab() {
 
       <div className="flex items-center gap-4 pt-2">
         <AccentButton onClick={runScan} loading={scanning} icon={LuScan}>
-          {scanning ? "Scanning..." : t("settings.scanNow")}
+          {scanning ? t("settings.scanning") : t("settings.scanNow")}
         </AccentButton>
         {result && (
           <span className="text-sm text-gray-500">{result}</span>
@@ -194,12 +194,12 @@ function SyncTab() {
     try {
       const res = await fetch("/api/sync/status");
       if (res.ok) {
-        setTestResult({ ok: true, msg: "Connection successful" });
+        setTestResult({ ok: true, msg: t("settings.connectionSuccess") });
       } else {
         setTestResult({ ok: false, msg: `Server returned ${res.status}` });
       }
     } catch {
-      setTestResult({ ok: false, msg: "Connection failed — server unreachable" });
+      setTestResult({ ok: false, msg: t("settings.connectionFailed") });
     } finally {
       setTesting(false);
     }
@@ -209,17 +209,16 @@ function SyncTab() {
 
   return (
     <div className="space-y-6">
-      <SectionTitle>Sync Configuration</SectionTitle>
+      <SectionTitle>{t("settings.syncConfig")}</SectionTitle>
       <InfoNote>
-        Server URL and secrets are configured in <code className="font-mono text-xs">.env.local</code>.
-        Shown here for reference only.
+        {t("settings.syncEnvInfo")}
       </InfoNote>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <ReadOnlyField label="Server URL" value={serverUrl} />
+        <ReadOnlyField label={t("settings.serverUrl")} value={serverUrl} />
 
         <div className="space-y-1">
-          <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">Sync Secret</label>
+          <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">{t("settings.syncSecretLabel")}</label>
           <div className="flex items-center gap-2">
             <div className="flex-1 bg-gray-50 border border-gray-200 rounded-xl px-3 py-2 text-sm text-gray-700 font-mono">
               {showSecret ? "devforge-sync-2026" : "••••••••••••••••"}
@@ -234,7 +233,7 @@ function SyncTab() {
         </div>
 
         <div className="space-y-1">
-          <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">Owner Secret</label>
+          <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">{t("settings.ownerSecretLabel")}</label>
           <div className="flex items-center gap-2">
             <div className="flex-1 bg-gray-50 border border-gray-200 rounded-xl px-3 py-2 text-sm text-gray-700 font-mono">
               ••••••••••••••••
@@ -245,8 +244,8 @@ function SyncTab() {
 
       <div className="flex items-center justify-between bg-white border border-gray-200 rounded-xl px-4 py-3">
         <div>
-          <div className="text-sm font-medium text-[#1a1a1a]">Auto-sync on startup</div>
-          <div className="text-xs text-gray-500 mt-0.5">Automatically push/pull when DevForge starts</div>
+          <div className="text-sm font-medium text-[#1a1a1a]">{t("settings.autoPushOnWrite")}</div>
+          <div className="text-xs text-gray-500 mt-0.5">{t("settings.pushDebounce")}</div>
         </div>
         <button
           onClick={toggleAutoSync}
@@ -264,7 +263,7 @@ function SyncTab() {
 
       <div className="flex items-center gap-4">
         <AccentButton onClick={testConnection} loading={testing} icon={LuRefreshCw}>
-          {testing ? "Testing..." : t("settings.testConnection")}
+          {testing ? t("settings.testing") : t("settings.testConnection")}
         </AccentButton>
         {testResult && (
           <span className={`flex items-center gap-1.5 text-sm ${testResult.ok ? "text-green-600" : "text-red-500"}`}>
@@ -374,7 +373,7 @@ function AutomationTab() {
                 {projects.length === 0 && (
                   <tr>
                     <td colSpan={6} className="px-4 py-8 text-center text-gray-400">
-                      No projects found
+                      {t("projects.noProjects")}
                     </td>
                   </tr>
                 )}
@@ -389,12 +388,12 @@ function AutomationTab() {
 
 // ── Tab 4: Notifications ──────────────────────────────────────────────────────
 
-const NOTIFICATION_TRIGGERS = [
-  "New feedback received",
-  "Issue status changed",
-  "Sync completed",
-  "Scan completed",
-  "New comment on issue",
+const NOTIFICATION_TRIGGER_KEYS = [
+  "settings.triggerNewFeedback",
+  "settings.triggerIssueStatus",
+  "settings.triggerSyncComplete",
+  "settings.triggerScanComplete",
+  "settings.triggerNewComment",
 ];
 
 function NotificationsTab() {
@@ -406,7 +405,7 @@ function NotificationsTab() {
   const [fromAddress, setFromAddress] = useState("");
   const [notificationEmail, setNotificationEmail] = useState("");
   const [triggers, setTriggers] = useState<Record<string, boolean>>(
-    Object.fromEntries(NOTIFICATION_TRIGGERS.map((t) => [t, false]))
+    Object.fromEntries(NOTIFICATION_TRIGGER_KEYS.map((k) => [k, false]))
   );
   const [saving, setSaving] = useState(false);
   const [saveMsg, setSaveMsg] = useState<{ ok: boolean; msg: string } | null>(null);
@@ -452,9 +451,9 @@ function NotificationsTab() {
           })
         )
       );
-      setSaveMsg({ ok: true, msg: "Settings saved" });
+      setSaveMsg({ ok: true, msg: t("settings.saved") });
     } catch {
-      setSaveMsg({ ok: false, msg: "Failed to save" });
+      setSaveMsg({ ok: false, msg: t("settings.saveFailed") });
     } finally {
       setSaving(false);
     }
@@ -478,9 +477,9 @@ function NotificationsTab() {
       });
       const data = await res.json() as { success: boolean; message?: string; error?: string };
       if (data.success) {
-        setTestMsg({ ok: true, msg: data.message ?? "Test passed" });
+        setTestMsg({ ok: true, msg: data.message ?? t("settings.testPassed") });
       } else {
-        setTestMsg({ ok: false, msg: data.error ?? "Test failed" });
+        setTestMsg({ ok: false, msg: data.error ?? t("settings.testFailed") });
       }
     } catch {
       setTestMsg({ ok: false, msg: "Request failed" });
@@ -495,12 +494,12 @@ function NotificationsTab() {
 
   return (
     <div className="space-y-6">
-      <SectionTitle>Notification Settings</SectionTitle>
-      <InfoNote>Configure SMTP to receive email notifications.</InfoNote>
+      <SectionTitle>{t("settings.notificationSettings")}</SectionTitle>
+      <InfoNote>{t("settings.smtpInfo")}</InfoNote>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="space-y-1">
-          <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">SMTP Host</label>
+          <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">{t("settings.smtpHost")}</label>
           <input
             type="text"
             value={smtpHost}
@@ -510,7 +509,7 @@ function NotificationsTab() {
           />
         </div>
         <div className="space-y-1">
-          <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">SMTP Port</label>
+          <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">{t("settings.smtpPort")}</label>
           <input
             type="text"
             value={smtpPort}
@@ -520,7 +519,7 @@ function NotificationsTab() {
           />
         </div>
         <div className="space-y-1">
-          <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">SMTP User</label>
+          <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">{t("settings.smtpUser")}</label>
           <input
             type="text"
             value={smtpUser}
@@ -530,7 +529,7 @@ function NotificationsTab() {
           />
         </div>
         <div className="space-y-1">
-          <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">SMTP Password</label>
+          <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">{t("settings.smtpPassword")}</label>
           <input
             type="password"
             value={smtpPassword}
@@ -540,7 +539,7 @@ function NotificationsTab() {
           />
         </div>
         <div className="space-y-1">
-          <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">From Address</label>
+          <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">{t("settings.smtpFrom")}</label>
           <input
             type="text"
             value={fromAddress}
@@ -550,7 +549,7 @@ function NotificationsTab() {
           />
         </div>
         <div className="space-y-1">
-          <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">Notification Email</label>
+          <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">{t("settings.notificationEmail")}</label>
           <input
             type="text"
             value={notificationEmail}
@@ -562,17 +561,17 @@ function NotificationsTab() {
       </div>
 
       <div>
-        <h4 className="text-sm font-semibold text-gray-700 mb-3">Notification Triggers</h4>
+        <h4 className="text-sm font-semibold text-gray-700 mb-3">{t("settings.notificationTriggers")}</h4>
         <div className="space-y-2">
-          {NOTIFICATION_TRIGGERS.map((trigger) => (
-            <label key={trigger} className="flex items-center gap-3 cursor-pointer">
+          {NOTIFICATION_TRIGGER_KEYS.map((key) => (
+            <label key={key} className="flex items-center gap-3 cursor-pointer">
               <input
                 type="checkbox"
-                checked={!!triggers[trigger]}
-                onChange={() => toggleTrigger(trigger)}
+                checked={!!triggers[key]}
+                onChange={() => toggleTrigger(key)}
                 className="rounded"
               />
-              <span className="text-sm text-gray-700">{trigger}</span>
+              <span className="text-sm text-gray-700">{t(key)}</span>
             </label>
           ))}
         </div>
@@ -580,10 +579,10 @@ function NotificationsTab() {
 
       <div className="flex items-center gap-4 flex-wrap">
         <AccentButton onClick={saveSettings} loading={saving} icon={LuSettings}>
-          {saving ? "Saving..." : t("settings.saveSMTP")}
+          {saving ? t("common.saving") : t("settings.saveSMTP")}
         </AccentButton>
         <AccentButton onClick={sendTestEmail} loading={testing} icon={LuBell}>
-          {testing ? "Sending..." : t("settings.sendTestEmail")}
+          {testing ? t("settings.sending") : t("settings.sendTestEmail")}
         </AccentButton>
         {saveMsg && (
           <span className={`flex items-center gap-1.5 text-sm ${saveMsg.ok ? "text-green-600" : "text-red-500"}`}>
@@ -620,6 +619,7 @@ const MCP_TOOLS = [
 ];
 
 function McpTab() {
+  const { t } = useI18n();
   const [reregistering, setReregistering] = useState(false);
   const [reregResult, setReregResult] = useState<string | null>(null);
 
@@ -628,27 +628,27 @@ function McpTab() {
     setReregResult(null);
     // Simulate — actual re-registration requires CLI tool
     await new Promise((r) => setTimeout(r, 1000));
-    setReregResult("Re-registration requires running: npx devforge mcp register");
+    setReregResult(t("settings.reregisterInfo"));
     setReregistering(false);
   }
 
   return (
     <div className="space-y-6">
-      <SectionTitle>MCP Server</SectionTitle>
+      <SectionTitle>{t("settings.mcpConfig")}</SectionTitle>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <ReadOnlyField label="Server Path" value="~/.devforge/mcp-server/index.js" />
+        <ReadOnlyField label={t("settings.mcpServerPath")} value="~/.devforge/mcp-server/index.js" />
         <div className="space-y-1">
-          <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">Registration Status</label>
+          <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">{t("settings.mcpRegStatus")}</label>
           <div className="flex items-center gap-2 bg-green-50 border border-green-200 rounded-xl px-3 py-2">
             <LuCircleCheck className="w-4 h-4 text-green-600" />
-            <span className="text-sm text-green-700 font-medium">Registered</span>
+            <span className="text-sm text-green-700 font-medium">{t("settings.registered")}</span>
           </div>
         </div>
       </div>
 
       <div>
-        <h4 className="text-sm font-semibold text-gray-700 mb-3">Available Tools ({MCP_TOOLS.length})</h4>
+        <h4 className="text-sm font-semibold text-gray-700 mb-3">{t("settings.availableTools")} ({MCP_TOOLS.length})</h4>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
           {MCP_TOOLS.map((tool) => (
             <div
@@ -663,7 +663,7 @@ function McpTab() {
 
       <div className="flex items-center gap-4">
         <AccentButton onClick={handleReregister} loading={reregistering} icon={LuRefreshCw}>
-          {reregistering ? "Processing..." : "Re-register"}
+          {reregistering ? t("settings.processing") : t("settings.reregister")}
         </AccentButton>
         {reregResult && <span className="text-sm text-gray-500">{reregResult}</span>}
       </div>
@@ -673,48 +673,49 @@ function McpTab() {
 
 // ── Tab 6: Plugin ─────────────────────────────────────────────────────────────
 
-const PLUGIN_COMMANDS = [
-  { cmd: "devforge scan", desc: "Scan git repos and import projects" },
-  { cmd: "devforge sync pull", desc: "Pull data from server" },
-  { cmd: "devforge sync push", desc: "Push data to server" },
-  { cmd: "devforge add issue <title>", desc: "Add an issue to a project" },
-  { cmd: "devforge add note <title>", desc: "Add a note to a project" },
-  { cmd: "devforge mcp register", desc: "Register the MCP server" },
-  { cmd: "devforge open", desc: "Open the dashboard in browser" },
+const PLUGIN_COMMAND_KEYS = [
+  { cmd: "devforge scan", descKey: "settings.cmdScan" },
+  { cmd: "devforge sync pull", descKey: "settings.cmdSyncPull" },
+  { cmd: "devforge sync push", descKey: "settings.cmdSyncPush" },
+  { cmd: "devforge add issue <title>", descKey: "settings.cmdAddIssue" },
+  { cmd: "devforge add note <title>", descKey: "settings.cmdAddNote" },
+  { cmd: "devforge mcp register", descKey: "settings.cmdMcpRegister" },
+  { cmd: "devforge open", descKey: "settings.cmdOpen" },
 ];
 
 function PluginTab() {
+  const { t } = useI18n();
   const [reloading, setReloading] = useState(false);
   const [reloadResult, setReloadResult] = useState<string | null>(null);
 
   async function handleReload() {
     setReloading(true);
     await new Promise((r) => setTimeout(r, 800));
-    setReloadResult("Plugin reloaded — restart Claude to apply changes");
+    setReloadResult(t("settings.pluginReloaded"));
     setReloading(false);
   }
 
   return (
     <div className="space-y-6">
-      <SectionTitle>Plugin / CLI</SectionTitle>
+      <SectionTitle>{t("settings.pluginConfig")}</SectionTitle>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <ReadOnlyField label="Install Path" value="/usr/local/lib/node_modules/devforge" />
-        <ReadOnlyField label="Version" value="1.0.0" />
-        <ReadOnlyField label="Node.js Version Required" value=">=18.0.0" />
-        <ReadOnlyField label="Config Directory" value="~/.devforge/" />
+        <ReadOnlyField label={t("settings.installPath")} value="/usr/local/lib/node_modules/devforge" />
+        <ReadOnlyField label={t("settings.version")} value="1.0.0" />
+        <ReadOnlyField label={t("settings.nodeVersionRequired")} value=">=18.0.0" />
+        <ReadOnlyField label={t("settings.configDirectory")} value="~/.devforge/" />
       </div>
 
       <div>
-        <h4 className="text-sm font-semibold text-gray-700 mb-3">CLI Commands</h4>
+        <h4 className="text-sm font-semibold text-gray-700 mb-3">{t("settings.availableCommands")}</h4>
         <div className="space-y-2">
-          {PLUGIN_COMMANDS.map(({ cmd, desc }) => (
+          {PLUGIN_COMMAND_KEYS.map(({ cmd, descKey }) => (
             <div
               key={cmd}
               className="flex items-start gap-3 bg-gray-50 border border-gray-200 rounded-xl px-4 py-2.5"
             >
               <code className="text-xs font-mono text-[#1a1a1a] font-semibold whitespace-nowrap">{cmd}</code>
-              <span className="text-xs text-gray-500">{desc}</span>
+              <span className="text-xs text-gray-500">{t(descKey)}</span>
             </div>
           ))}
         </div>
@@ -722,7 +723,7 @@ function PluginTab() {
 
       <div className="flex items-center gap-4">
         <AccentButton onClick={handleReload} loading={reloading} icon={LuRefreshCw}>
-          {reloading ? "Reloading..." : "Reload Plugin"}
+          {reloading ? t("settings.reloading") : t("settings.reloadPlugin")}
         </AccentButton>
         {reloadResult && <span className="text-sm text-gray-500">{reloadResult}</span>}
       </div>
@@ -748,7 +749,7 @@ function DatabaseTab() {
       const data = await res.json() as DbStats;
       setStats(data);
     } catch {
-      setError("Failed to load database stats");
+      setError(t("settings.dbLoadFailed"));
     } finally {
       setLoading(false);
     }
@@ -790,10 +791,10 @@ function DatabaseTab() {
       });
       const data = await res.json() as { success?: boolean; backup?: string; error?: string };
       if (data.success) {
-        setImportMsg({ ok: true, msg: `Imported successfully. Backup: ${data.backup ?? "saved"}` });
+        setImportMsg({ ok: true, msg: `${t("settings.importSuccess")} ${data.backup ?? "saved"}` });
         void loadStats();
       } else {
-        setImportMsg({ ok: false, msg: data.error ?? "Import failed" });
+        setImportMsg({ ok: false, msg: data.error ?? t("settings.importFailed") });
       }
     } catch {
       setImportMsg({ ok: false, msg: "Import request failed" });
@@ -805,12 +806,12 @@ function DatabaseTab() {
 
   return (
     <div className="space-y-6">
-      <SectionTitle>Database</SectionTitle>
+      <SectionTitle>{t("settings.dbInfo")}</SectionTitle>
 
       {loading && (
         <div className="flex items-center gap-2 text-sm text-gray-400 py-4">
           <LuLoader className="w-4 h-4 animate-spin" />
-          Loading stats...
+          {t("common.loading")}
         </div>
       )}
 
@@ -819,12 +820,12 @@ function DatabaseTab() {
       {stats && (
         <>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <ReadOnlyField label="Database Path" value={stats.dbPath} />
-            <ReadOnlyField label="File Size" value={formatBytes(stats.sizeBytes)} />
+            <ReadOnlyField label={t("settings.dbPath")} value={stats.dbPath} />
+            <ReadOnlyField label={t("settings.dbSize")} value={formatBytes(stats.sizeBytes)} />
           </div>
 
           <div>
-            <h4 className="text-sm font-semibold text-gray-700 mb-3">Table Row Counts</h4>
+            <h4 className="text-sm font-semibold text-gray-700 mb-3">{t("settings.tableStats")}</h4>
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
               {stats.tables.map((t) => (
                 <div
@@ -859,14 +860,14 @@ function DatabaseTab() {
           className="flex items-center gap-2 bg-white border border-gray-200 text-gray-600 rounded-full px-5 py-2.5 text-sm font-medium hover:border-gray-300 hover:text-gray-800 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
         >
           {importing ? <LuLoader className="w-4 h-4 animate-spin" /> : <LuUpload className="w-4 h-4" />}
-          {importing ? "Importing..." : t("settings.importDb")}
+          {importing ? t("settings.importing") : t("settings.importDb")}
         </button>
         <button
           onClick={loadStats}
           className="flex items-center gap-2 text-gray-500 hover:text-gray-700 text-sm transition-colors"
         >
           <LuRefreshCw className="w-4 h-4" />
-          Refresh
+          {t("settings.refresh")}
         </button>
       </div>
 
@@ -889,14 +890,14 @@ function ThemeTab() {
   const { t } = useI18n();
 
   const options: { value: ThemeMode; label: string; desc: string; preview: string }[] = [
-    { value: "light", label: t("settings.light"), desc: "Always use light mode", preview: "bg-[#f0f0e8]" },
-    { value: "dark", label: t("settings.dark"), desc: "Always use dark mode", preview: "bg-[#0f0f0f]" },
-    { value: "system", label: t("settings.system"), desc: "Follow your OS preference", preview: "bg-gradient-to-r from-[#f0f0e8] to-[#0f0f0f]" },
+    { value: "light", label: t("settings.light"), desc: t("settings.lightDesc"), preview: "bg-[#f0f0e8]" },
+    { value: "dark", label: t("settings.dark"), desc: t("settings.darkDesc"), preview: "bg-[#0f0f0f]" },
+    { value: "system", label: t("settings.system"), desc: t("settings.systemDesc"), preview: "bg-gradient-to-r from-[#f0f0e8] to-[#0f0f0f]" },
   ];
 
   return (
     <div className="space-y-6">
-      <SectionTitle>Theme</SectionTitle>
+      <SectionTitle>{t("settings.themeTitle")}</SectionTitle>
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         {options.map(({ value, label, desc, preview }) => (
@@ -928,6 +929,7 @@ function ThemeTab() {
 type Lang = "en" | "zh";
 
 function LanguageTab() {
+  const { t } = useI18n();
   const [lang, setLang] = useState<Lang>("en");
 
   useEffect(() => {
@@ -941,15 +943,15 @@ function LanguageTab() {
   }
 
   const options: { value: Lang; label: string; native: string; desc: string }[] = [
-    { value: "en", label: "English", native: "English", desc: "Use English throughout the interface" },
-    { value: "zh", label: "中文", native: "中文", desc: "在整个界面中使用中文" },
+    { value: "en", label: "English", native: "English", desc: t("settings.langEnDesc") },
+    { value: "zh", label: "中文", native: "中文", desc: t("settings.langZhDesc") },
   ];
 
   return (
     <div className="space-y-6">
-      <SectionTitle>Language / 语言</SectionTitle>
+      <SectionTitle>{t("settings.languageTitle")}</SectionTitle>
       <InfoNote>
-        Language preference is saved to localStorage.
+        {t("settings.langLocalStorageInfo")}
       </InfoNote>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-md">
