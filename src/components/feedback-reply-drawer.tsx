@@ -4,6 +4,7 @@ import { useState, useCallback } from "react";
 import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import Placeholder from "@tiptap/extension-placeholder";
+import Image from "@tiptap/extension-image";
 import {
   LuX,
   LuBold,
@@ -64,6 +65,7 @@ export function FeedbackReplyDrawer({ feedback, onClose }: Props) {
     extensions: [
       StarterKit,
       Placeholder.configure({ placeholder: "Write your reply…" }),
+      Image.configure({ inline: true, allowBase64: false }),
     ],
     immediatelyRender: false,
     editorProps: {
@@ -96,9 +98,10 @@ export function FeedbackReplyDrawer({ feedback, onClose }: Props) {
           editor
             .chain()
             .focus()
-            .insertContent(
-              `<img src="${fullUrl}" alt="${file.name}" style="max-width:100%" />`
-            )
+            .insertContent({
+              type: "image",
+              attrs: { src: fullUrl, alt: file.name },
+            })
             .run();
         }
       } catch (e) {

@@ -4,6 +4,7 @@ import { useState, useCallback, useEffect, useRef } from "react";
 import { useEditor, EditorContent } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import Placeholder from "@tiptap/extension-placeholder";
+import Image from "@tiptap/extension-image";
 import {
   LuX,
   LuBold,
@@ -136,6 +137,7 @@ export function FeedbackDetailDrawer({ feedback, onClose }: Props) {
     extensions: [
       StarterKit,
       Placeholder.configure({ placeholder: t("feedback.writeReply") }),
+      Image.configure({ inline: true, allowBase64: false }),
     ],
     immediatelyRender: false,
     editorProps: {
@@ -168,9 +170,10 @@ export function FeedbackDetailDrawer({ feedback, onClose }: Props) {
           editor
             .chain()
             .focus()
-            .insertContent(
-              `<img src="${fullUrl}" alt="${file.name}" style="max-width:100%" />`
-            )
+            .insertContent({
+              type: "image",
+              attrs: { src: fullUrl, alt: file.name },
+            })
             .run();
         }
       } catch (e) {
@@ -219,13 +222,19 @@ export function FeedbackDetailDrawer({ feedback, onClose }: Props) {
     }
   };
 
-  // Render HTML safely (images get server prefix)
+  // Render HTML safely (images get server prefix, unescape HTML entities)
   function renderContent(html: string) {
-    const fixed = html.replace(
-      /src="(\/[^"]+)"/g,
-      `src="${SERVER_URL}$1"`
+    let fixed = html
+      // Unescape HTML entities that may have been double-encoded
+      .replace(/&lt;/g, "<").replace(/&gt;/g, ">").replace(/&amp;/g, "&").replace(/&quot;/g, '"')
+      // Prefix relative image paths with server URL
+      .replace(/src="(\/[^"]+)"/g, `src="${SERVER_URL}$1"`);
+    return (
+      <div
+        className="prose prose-sm max-w-none break-words overflow-hidden [&_img]:max-w-full [&_img]:rounded-lg [&_img]:my-2"
+        dangerouslySetInnerHTML={{ __html: fixed }}
+      />
     );
-    return <div className="prose prose-sm max-w-none" dangerouslySetInnerHTML={{ __html: fixed }} />;
   }
 
   return (
@@ -356,7 +365,7 @@ export function FeedbackDetailDrawer({ feedback, onClose }: Props) {
                       </span>
                     </div>
                     <div
-                      className={`rounded-2xl px-4 py-3 shadow-sm ${
+                      className={`rounded-2xl px-4 py-3 shadow-sm overflow-hidden break-words ${
                         isOwner
                           ? "bg-[#c6e135]/20 rounded-tr-sm"
                           : "bg-white rounded-tl-sm"
