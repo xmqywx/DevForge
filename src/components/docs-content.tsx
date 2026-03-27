@@ -4,16 +4,20 @@ import { useEffect, useRef, useCallback } from "react";
 import { createPortal } from "react-dom";
 import { useState } from "react";
 import { DocSection } from "@/content/docs";
+import { useI18n } from "@/lib/i18n";
 
 interface DocsContentProps {
   doc: DocSection;
 }
 
 export function DocsContent({ doc }: DocsContentProps) {
+  const { locale } = useI18n();
   const contentRef = useRef<HTMLDivElement>(null);
   const [portals, setPortals] = useState<Array<{ el: Element; code: string }>>(
     []
   );
+
+  const html = locale === "zh" && doc.contentZh ? doc.contentZh : doc.content;
 
   useEffect(() => {
     if (!contentRef.current) return;
@@ -37,7 +41,7 @@ export function DocsContent({ doc }: DocsContentProps) {
     });
 
     setPortals(newPortals);
-  }, [doc.slug]);
+  }, [doc.slug, locale]);
 
   return (
     <>
@@ -45,7 +49,7 @@ export function DocsContent({ doc }: DocsContentProps) {
         <div
           ref={contentRef}
           className="docs-content"
-          dangerouslySetInnerHTML={{ __html: doc.content }}
+          dangerouslySetInnerHTML={{ __html: html }}
         />
 
         <style>{`

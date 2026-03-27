@@ -28,10 +28,10 @@ export function DocsSidebar({ sections, activeSlug }: DocsSidebarProps) {
       <div className="mb-4">
         <input
           type="text"
-          placeholder="Search docs..."
+          placeholder={t("common.search")}
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#c6e135] bg-[#f0f0e8] placeholder-gray-400"
+          className="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#c6e135] bg-[#f0f0e8] text-[#1a1a1a] placeholder-gray-400"
         />
       </div>
 
@@ -49,7 +49,7 @@ export function DocsSidebar({ sections, activeSlug }: DocsSidebarProps) {
                 className={`block px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
                   isActive
                     ? "bg-[#c6e135] text-[#1a1a1a]"
-                    : "text-gray-600 hover:bg-[#f0f0e8] hover:text-[#1a1a1a]"
+                    : "text-[#374151] hover:bg-[#f0f0e8] hover:text-[#1a1a1a]"
                 }`}
               >
                 {t(section.titleKey)}
