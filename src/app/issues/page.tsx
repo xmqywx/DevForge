@@ -528,6 +528,20 @@ export default function IssuesPage() {
   const [createDialogOpen, setCreateDialogOpen] = useState(false);
   const [selectedIssue, setSelectedIssue] = useState<KanbanIssue | null>(null);
 
+  const [showFilters, setShowFilters] = useState(true);
+
+  // Listen for floating-action events
+  useEffect(() => {
+    const handleCreate = () => setCreateDialogOpen(true);
+    const handleToggleFilters = () => setShowFilters((v) => !v);
+    window.addEventListener("devforge:create-issue", handleCreate);
+    window.addEventListener("devforge:toggle-filters", handleToggleFilters);
+    return () => {
+      window.removeEventListener("devforge:create-issue", handleCreate);
+      window.removeEventListener("devforge:toggle-filters", handleToggleFilters);
+    };
+  }, []);
+
   // Fetch projects + issues
   useEffect(() => {
     async function loadData() {
@@ -643,7 +657,7 @@ export default function IssuesPage() {
       </div>
 
       {/* Filter bar */}
-      <div className="flex flex-wrap items-center gap-3">
+      {showFilters && <div className="flex flex-wrap items-center gap-3">
         {/* Search */}
         <div className="flex items-center gap-2 bg-white rounded-full px-4 py-2 shadow-sm flex-1 min-w-[200px] max-w-xs">
           <LuSearch className="w-4 h-4 text-gray-400 shrink-0" />
@@ -702,7 +716,7 @@ export default function IssuesPage() {
             </button>
           ))}
         </div>
-      </div>
+      </div>}
 
       {/* Count */}
       <div className="text-sm text-gray-500">

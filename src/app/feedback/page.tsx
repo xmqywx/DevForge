@@ -35,8 +35,16 @@ export default function FeedbackPage() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [filter, setFilter] = useState<string>("all");
+  const [showFilters, setShowFilters] = useState(true);
   const [lastFetched, setLastFetched] = useState<Date | null>(null);
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  // Listen for floating-action events
+  useEffect(() => {
+    const handleToggleFilters = () => setShowFilters((v) => !v);
+    window.addEventListener("devforge:toggle-filters", handleToggleFilters);
+    return () => window.removeEventListener("devforge:toggle-filters", handleToggleFilters);
+  }, []);
 
   const loadFeedback = useCallback(async (silent = false) => {
     if (!silent) setLoading(true);
@@ -105,7 +113,7 @@ export default function FeedbackPage() {
       </div>
 
       {/* Filter bar */}
-      <div className="flex items-center gap-2 flex-wrap">
+      {showFilters && <div className="flex items-center gap-2 flex-wrap">
         <LuFilter className="w-4 h-4 text-gray-400" />
         {FILTER_OPTIONS.map((opt) => (
           <button
@@ -123,7 +131,7 @@ export default function FeedbackPage() {
         <span className="text-sm text-gray-400 ml-auto">
           {filtered.length} {t("feedback.items")}
         </span>
-      </div>
+      </div>}
 
       {/* Content */}
       {loading ? (

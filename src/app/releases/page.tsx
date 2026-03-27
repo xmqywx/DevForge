@@ -171,6 +171,16 @@ export default function ReleasesPage() {
   const [formOpen, setFormOpen] = useState(false);
   const [editingRelease, setEditingRelease] = useState<Release | null>(null);
 
+  // Listen for floating-action events
+  useEffect(() => {
+    const handleCreate = () => {
+      setEditingRelease(null);
+      setFormOpen(true);
+    };
+    window.addEventListener("devforge:create-release", handleCreate);
+    return () => window.removeEventListener("devforge:create-release", handleCreate);
+  }, []);
+
   useEffect(() => {
     async function loadData() {
       setLoading(true);
